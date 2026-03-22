@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Dashboard — School Server</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--surface:#16191f;--surface2:#1d2129;--border:#2a2d35;
+  --accent:#5865F2;--text:#e3e5e8;--muted:#8e9297;
+  --green:#3ba55d;--red:#ed4245;--yellow:#faa61a;--radius:10px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+.hidden{display:none!important}
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+
+/* LOGIN */
+.admin-login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+.admin-login-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;width:100%;max-width:360px;text-align:center}
+.admin-login-card h2{font-size:1.1rem;font-weight:600;margin-bottom:.3rem}
+.admin-login-card p{color:var(--muted);font-size:.825rem;margin-bottom:1.5rem}
+
+/* SIDEBAR */
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:1.25rem 0;display:flex;flex-direction:column}
+.sidebar-logo{display:flex;align-items:center;gap:.6rem;padding:.25rem 1.25rem 1.25rem;border-bottom:1px solid var(--border);margin-bottom:.75rem}
+.logo-icon{width:34px;height:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.logo-text{font-weight:600;font-size:.95rem}
+.logo-sub{font-size:.7rem;color:var(--muted)}
+.nav-section{padding:.25rem 1rem .1rem;font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:.5rem}
+.nav-item{display:flex;align-items:center;gap:.65rem;padding:.55rem 1.25rem;cursor:pointer;color:var(--muted);transition:all .15s;font-size:.875rem;font-weight:500;margin:1px 0}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--surface2);color:var(--accent);border-right:2px solid var(--accent)}
+.nav-item .icon{width:16px;text-align:center;font-size:14px}
+.nav-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:.65rem;padding:.15rem .45rem;border-radius:20px;font-weight:600}
+.sidebar-footer{margin-top:auto;padding:1rem 1.25rem;border-top:1px solid var(--border)}
+.sidebar-footer a{font-size:.8rem;color:var(--muted);text-decoration:none;display:block;margin-bottom:.5rem}
+.sidebar-footer a:hover{color:var(--text)}
+
+/* MAIN */
+.main{background:var(--bg);padding:1.75rem;overflow-y:auto}
+.page-header{margin-bottom:1.5rem}
+.page-header h1{font-size:1.2rem;font-weight:600;margin-bottom:.2rem}
+.page-header p{color:var(--muted);font-size:.825rem}
+.panel{display:none}
+.panel.active{display:block}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.card-title{font-weight:600;font-size:.9rem}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.875rem;margin-bottom:1.25rem}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem}
+.stat .lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.35rem}
+.stat .val{font-size:1.4rem;font-weight:600}
+.stat .val.green{color:var(--green)}
+.stat .val.accent{color:var(--accent)}
+.stat .val.yellow{color:var(--yellow)}
+
+/* BUTTONS */
+.btn{border:none;border-radius:7px;padding:.5rem 1rem;font-size:.825rem;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;display:inline-flex;align-items:center;gap:.4rem}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{opacity:.88}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-danger{background:#ed424520;color:var(--red);border:1px solid #ed424530}
+.btn-danger:hover{background:#ed424540}
+.btn-sm{padding:.3rem .65rem;font-size:.75rem}
+
+/* FORMS */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.875rem;margin-bottom:.875rem}
+.form-group{margin-bottom:.875rem}
+.form-group label{display:block;font-size:.775rem;color:var(--muted);margin-bottom:.4rem;font-weight:500}
+.form-control{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:.55rem .875rem;color:var(--text);font-size:.875rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s}
+.form-control:focus{border-color:var(--accent)}
+select.form-control option{background:var(--surface2)}
+textarea.form-control{resize:vertical;min-height:80px;line-height:1.5}
+
+/* TABLE */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding:.6rem .875rem;text-align:left;border-bottom:1px solid var(--border);font-weight:500}
+td{padding:.65rem .875rem;border-bottom:1px solid var(--border);font-size:.85rem;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+
+/* BADGES */
+.role-badge{font-size:.68rem;padding:.2rem .55rem;border-radius:20px;font-weight:600}
+.role-badge.owner{background:#ffd70020;color:#ffd700}
+.role-badge.admin{background:#ed424520;color:var(--red)}
+.role-badge.mod{background:#5865f220;color:var(--accent)}
+.role-badge.member{background:#8e929720;color:var(--muted)}
+.status-pill{font-size:.68rem;padding:.2rem .55rem;border-radius:20px;font-weight:600}
+.status-pill.online{background:#3ba55d20;color:var(--green)}
+.status-pill.idle{background:#faa61a20;color:var(--yellow)}
+.status-pill.offline{background:#4f545c30;color:#72767d}
+
+/* TOGGLE */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-info .title{font-weight:500;font-size:.875rem}
+.toggle-info .desc{font-size:.775rem;color:var(--muted);margin-top:.15rem}
+.toggle{position:relative;width:38px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:#4f545c;border-radius:22px;cursor:pointer;transition:.2s}
+.toggle-slider:before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle input:checked+.toggle-slider{background:var(--accent)}
+.toggle input:checked+.toggle-slider:before{transform:translateX(16px)}
+
+/* ANN ITEMS */
+.ann-item{display:flex;align-items:flex-start;gap:.875rem;padding:.875rem 0;border-bottom:1px solid var(--border)}
+.ann-item:last-child{border-bottom:none}
+.ann-icon{width:36px;height:36px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ann-body{flex:1;min-width:0}
+.ann-title{font-weight:500;font-size:.875rem;margin-bottom:.2rem}
+.ann-preview{font-size:.775rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ann-meta{font-size:.72rem;color:var(--muted);margin-top:.25rem}
+.ann-actions{display:flex;gap:.35rem;flex-shrink:0}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:100;padding:1rem}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.modal-header h3{font-weight:600;font-size:1rem}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.25rem;cursor:pointer;line-height:1}
+.modal-footer{display:flex;justify-content:flex-end;gap:.6rem;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#23272a;border:1px solid var(--border);border-radius:10px;padding:.75rem 1.1rem;font-size:.85rem;color:var(--text);z-index:200;display:flex;align-items:center;gap:.6rem;opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0}
+.toast-dot.red{background:var(--red)}
+
+/* LOADING */
+.loading{text-align:center;padding:2rem;color:var(--muted);font-size:.875rem}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto .75rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* LOGIN FORM */
+.form-control-login{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:.6rem .875rem;color:var(--text);font-size:.875rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;margin-bottom:.75rem}
+.form-control-login:focus{border-color:var(--accent)}
+</style>
+</head>
+<body>
+
+<!-- ADMIN LOGIN -->
+<div id="adminLogin" class="admin-login">
+  <div class="admin-login-card">
+    <div style="font-size:2rem;margin-bottom:.875rem">🛡️</div>
+    <h2>Admin Dashboard</h2>
+    <p>Enter the server password to manage your site</p>
+    <input class="form-control-login" type="password" id="adminPw" placeholder="Password" />
+    <div id="adminErr" style="color:var(--red);font-size:.8rem;margin-bottom:.75rem;display:none">Incorrect password.</div>
+    <button class="btn btn-primary" id="adminLoginBtn" style="width:100%;justify-content:center">Sign in</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="layout hidden">
+
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🎓</div>
+      <div><div class="logo-text" id="sidebar-name">School Server</div><div class="logo-sub">Admin Dashboard</div></div>
+    </div>
+    <div class="nav-section">Overview</div>
+    <div class="nav-item active" onclick="nav('overview',this)"><span class="icon">📊</span>Overview</div>
+    <div class="nav-section">Manage</div>
+    <div class="nav-item" onclick="nav('members',this)"><span class="icon">👥</span>Members<span class="nav-badge" id="memberBadge">0</span></div>
+    <div class="nav-item" onclick="nav('announcements',this)"><span class="icon">📢</span>Announcements</div>
+    <div class="nav-item" onclick="nav('rules',this)"><span class="icon">📋</span>Rules</div>
+    <div class="nav-section">Config</div>
+    <div class="nav-item" onclick="nav('settings',this)"><span class="icon">⚙️</span>Settings</div>
+    <div class="sidebar-footer">
+      <a href="index.html" target="_blank">↗ View public site</a>
+      <a href="#" onclick="adminLogout()">← Log out</a>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- OVERVIEW -->
+    <div class="panel active" id="panel-overview">
+      <div class="page-header"><h1>Overview</h1><p>Snapshot of your server website</p></div>
+      <div class="stats">
+        <div class="stat"><div class="lbl">Members</div><div class="val accent" id="ov-members">—</div></div>
+        <div class="stat"><div class="lbl">Online</div><div class="val green" id="ov-online">—</div></div>
+        <div class="stat"><div class="lbl">Announcements</div><div class="val" id="ov-ann">—</div></div>
+        <div class="stat"><div class="lbl">Rules</div><div class="val yellow" id="ov-rules">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Quick actions</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:.6rem">
+          <button class="btn btn-primary" onclick="nav('members',document.querySelector('[onclick*=members]'));openAddMember()">+ Add member</button>
+          <button class="btn btn-ghost" onclick="nav('announcements',document.querySelector('[onclick*=announcements]'));openAddAnn()">+ New announcement</button>
+          <button class="btn btn-ghost" onclick="nav('rules',document.querySelector('[onclick*=rules]'));openAddRule()">+ Add rule</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Recent members</span><button class="btn btn-ghost btn-sm" onclick="nav('members',document.querySelector('[onclick*=members]'))">View all</button></div>
+        <div class="table-wrap"><table id="ovMemberTable"><tr><td><div class="loading"><div class="spinner"></div></div></td></tr></table></div>
+      </div>
+    </div>
+
+    <!-- MEMBERS -->
+    <div class="panel" id="panel-members">
+      <div class="page-header"><h1>Members</h1><p>Add, edit, or remove members</p></div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">All members</span><button class="btn btn-primary btn-sm" onclick="openAddMember()">+ Add member</button></div>
+        <div class="table-wrap"><table id="memberTable"></table></div>
+      </div>
+    </div>
+
+    <!-- ANNOUNCEMENTS -->
+    <div class="panel" id="panel-announcements">
+      <div class="page-header"><h1>Announcements</h1><p>Manage posts on the public site</p></div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">All posts</span><button class="btn btn-primary btn-sm" onclick="openAddAnn()">+ New post</button></div>
+        <div id="annList"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- RULES -->
+    <div class="panel" id="panel-rules">
+      <div class="page-header"><h1>Rules</h1><p>Edit rules shown on your site</p></div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Server rules</span><button class="btn btn-primary btn-sm" onclick="openAddRule()">+ Add rule</button></div>
+        <div id="ruleList"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="panel" id="panel-settings">
+      <div class="page-header"><h1>Settings</h1><p>Configure your server website</p></div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">General</span></div>
+        <div class="form-group"><label>Server name</label><input class="form-control" id="set-name" placeholder="School Server" /></div>
+        <div class="form-group"><label>Discord invite link</label><input class="form-control" id="set-invite" placeholder="discord.gg/yourcode" /></div>
+        <div class="form-group"><label>Server description</label><textarea class="form-control" id="set-desc" placeholder="A private space for our class..."></textarea></div>
+        <button class="btn btn-primary" onclick="saveSettings()">Save changes</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Security</span></div>
+        <div class="form-group"><label>New site password</label><input class="form-control" id="set-pw" type="password" placeholder="Enter new password" /></div>
+        <div class="form-group"><label>Confirm new password</label><input class="form-control" id="set-pw2" type="password" placeholder="Confirm new password" /></div>
+        <button class="btn btn-ghost" onclick="changePw()">Update password</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MEMBER MODAL -->
+<div class="modal-overlay hidden" id="memberModal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="memberModalTitle">Add member</h3><button class="modal-close" onclick="closeModal('memberModal')">✕</button></div>
+    <div class="form-row">
+      <div class="form-group"><label>Display name</label><input class="form-control" id="m-name" placeholder="e.g. Alex K." /></div>
+      <div class="form-group"><label>Role</label>
+        <select class="form-control" id="m-role">
+          <option value="owner">Owner</option><option value="admin">Admin</option><option value="mod">Moderator</option><option value="member" selected>Member</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Status</label>
+        <select class="form-control" id="m-status">
+          <option value="online">Online</option><option value="idle">Idle</option><option value="offline" selected>Offline</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Accent color</label><input class="form-control" id="m-color" type="color" value="#5865F2" style="padding:.3rem .5rem;height:38px" /></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('memberModal')">Cancel</button>
+      <button class="btn btn-primary" id="saveMemberBtn" onclick="saveMember()">Save member</button>
+    </div>
+  </div>
+</div>
+
+<!-- ANN MODAL -->
+<div class="modal-overlay hidden" id="annModal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="annModalTitle">New announcement</h3><button class="modal-close" onclick="closeModal('annModal')">✕</button></div>
+    <div class="form-group"><label>Title</label><input class="form-control" id="a-title" placeholder="Announcement title" /></div>
+    <div class="form-group"><label>Body</label><textarea class="form-control" id="a-body" placeholder="Write your announcement..."></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>Tag</label>
+        <select class="form-control" id="a-tag">
+          <option value="📢 NEWS">News</option><option value="📌 PINNED">Pinned</option><option value="🎉 EVENT">Event</option><option value="⚠️ URGENT">Urgent</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Date</label><input class="form-control" id="a-date" type="date" /></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('annModal')">Cancel</button>
+      <button class="btn btn-primary" id="saveAnnBtn" onclick="saveAnn()">Post announcement</button>
+    </div>
+  </div>
+</div>
+
+<!-- RULE MODAL -->
+<div class="modal-overlay hidden" id="ruleModal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="ruleModalTitle">Add rule</h3><button class="modal-close" onclick="closeModal('ruleModal')">✕</button></div>
+    <div class="form-group"><label>Rule title</label><input class="form-control" id="r-title" placeholder="e.g. Be respectful" /></div>
+    <div class="form-group"><label>Description</label><textarea class="form-control" id="r-body" placeholder="Describe this rule..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('ruleModal')">Cancel</button>
+      <button class="btn btn-primary" id="saveRuleBtn" onclick="saveRule()">Save rule</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="toast-dot" id="toastDot"></div><span id="toastMsg">Saved!</span></div>
+
+<script>
+const SUPABASE_URL = 'https://ccepcamixgfvxgxwxdcv.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNjZXBjYW1peGdmdnhneHd4ZGN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTA4NjksImV4cCI6MjA4OTY4Njg2OX0.381K3TpmGoSdhgUP-ntAloGTxiPov5cqONiRtQXwlXs';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let editingMember=null, editingAnn=null, editingRule=null;
+
+function initials(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase()}
+
+// ── AUTH ──────────────────────────────────────────────
+async function adminLogin(){
+  const btn=document.getElementById('adminLoginBtn');
+  const err=document.getElementById('adminErr');
+  const pw=document.getElementById('adminPw').value;
+  if(!pw)return;
+  btn.disabled=true; btn.textContent='Checking...'; err.style.display='none';
+  const {data}=await sb.from('settings').select('value').eq('key','password').single();
+  if(data&&data.value===pw){
+    sessionStorage.setItem('admin_auth','1');
+    document.getElementById('adminLogin').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    await loadAll();
+  } else {
+    err.style.display='block'; btn.disabled=false; btn.textContent='Sign in';
+  }
+}
+function adminLogout(){
+  sessionStorage.removeItem('admin_auth');
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('adminLogin').classList.remove('hidden');
+  document.getElementById('adminPw').value='';
+}
+document.getElementById('adminLoginBtn').onclick=adminLogin;
+document.getElementById('adminPw').addEventListener('keydown',e=>{if(e.key==='Enter')adminLogin()});
+if(sessionStorage.getItem('admin_auth')==='1'){
+  document.getElementById('adminLogin').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+  loadAll();
+}
+
+// ── LOAD ALL ──────────────────────────────────────────
+async function loadAll(){
+  await Promise.all([loadSettings(),loadMembers(),loadAnns(),loadRules()]);
+}
+
+// ── SETTINGS ─────────────────────────────────────────
+async function loadSettings(){
+  const {data}=await sb.from('settings').select('*');
+  if(!data)return;
+  const s={};
+  data.forEach(r=>s[r.key]=r.value);
+  if(s.server_name){
+    document.getElementById('sidebar-name').textContent=s.server_name;
+    document.getElementById('set-name').value=s.server_name;
+  }
+  if(s.invite_link) document.getElementById('set-invite').value=s.invite_link;
+  if(s.description) document.getElementById('set-desc').value=s.description;
+}
+async function saveSettings(){
+  const name=document.getElementById('set-name').value.trim();
+  const invite=document.getElementById('set-invite').value.trim();
+  const desc=document.getElementById('set-desc').value.trim();
+  const updates=[
+    {key:'server_name',value:name||'School Server'},
+    {key:'invite_link',value:invite||'discord.gg/yourcode'},
+    {key:'description',value:desc},
+  ];
+  for(const u of updates){
+    await sb.from('settings').upsert(u,{onConflict:'key'});
+  }
+  if(name) document.getElementById('sidebar-name').textContent=name;
+  toast('Settings saved!');
+}
+async function changePw(){
+  const pw=document.getElementById('set-pw').value;
+  const pw2=document.getElementById('set-pw2').value;
+  if(!pw){toast('Enter a new password','red');return}
+  if(pw!==pw2){toast('Passwords do not match','red');return}
+  await sb.from('settings').upsert({key:'password',value:pw},{onConflict:'key'});
+  document.getElementById('set-pw').value='';
+  document.getElementById('set-pw2').value='';
+  toast('Password updated!');
+}
+
+// ── MEMBERS ──────────────────────────────────────────
+async function loadMembers(){
+  const {data}=await sb.from('members').select('*').order('id');
+  if(!data)return;
+  document.getElementById('memberBadge').textContent=data.length;
+  document.getElementById('ov-members').textContent=data.length;
+  document.getElementById('ov-online').textContent=data.filter(m=>m.status==='online').length;
+  renderMemberTable(data);
+  renderOvTable(data);
+}
+function renderMemberTable(data){
+  const rows=data.map(m=>`
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:.65rem">
+        <div style="width:30px;height:30px;border-radius:50%;background:${m.color||'#5865F2'}22;color:${m.color||'#5865F2'};display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.7rem;flex-shrink:0">${initials(m.name)}</div>
+        <span style="font-weight:500">${m.name}</span>
+      </div></td>
+      <td><span class="role-badge ${m.role}">${m.role.charAt(0).toUpperCase()+m.role.slice(1)}</span></td>
+      <td><span class="status-pill ${m.status}">${m.status.charAt(0).toUpperCase()+m.status.slice(1)}</span></td>
+      <td><div style="display:flex;gap:.35rem">
+        <button class="btn btn-ghost btn-sm" onclick="openEditMember(${m.id},'${m.name}','${m.role}','${m.status}','${m.color||'#5865F2'}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteMember(${m.id})">Remove</button>
+      </div></td>
+    </tr>`).join('');
+  const el=document.getElementById('memberTable');
+  if(el) el.innerHTML=`<thead><tr><th>Member</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows}</tbody>`;
+}
+function renderOvTable(data){
+  const rows=data.slice(0,5).map(m=>`
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:.6rem">
+        <div style="width:28px;height:28px;border-radius:50%;background:${m.color||'#5865F2'}22;color:${m.color||'#5865F2'};display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.68rem">${initials(m.name)}</div>
+        ${m.name}
+      </div></td>
+      <td><span class="role-badge ${m.role}">${m.role}</span></td>
+      <td><span class="status-pill ${m.status}">${m.status}</span></td>
+    </tr>`).join('');
+  const ov=document.getElementById('ovMemberTable');
+  if(ov) ov.innerHTML=`<thead><tr><th>Name</th><th>Role</th><th>Status</th></tr></thead><tbody>${rows}</tbody>`;
+}
+
+function openAddMember(){
+  editingMember=null;
+  document.getElementById('memberModalTitle').textContent='Add member';
+  document.getElementById('m-name').value='';
+  document.getElementById('m-role').value='member';
+  document.getElementById('m-status').value='offline';
+  document.getElementById('m-color').value='#5865F2';
+  document.getElementById('memberModal').classList.remove('hidden');
+}
+function openEditMember(id,name,role,status,color){
+  editingMember=id;
+  document.getElementById('memberModalTitle').textContent='Edit member';
+  document.getElementById('m-name').value=name;
+  document.getElementById('m-role').value=role;
+  document.getElementById('m-status').value=status;
+  document.getElementById('m-color').value=color;
+  document.getElementById('memberModal').classList.remove('hidden');
+}
+async function saveMember(){
+  const name=document.getElementById('m-name').value.trim();
+  if(!name)return;
+  const btn=document.getElementById('saveMemberBtn');
+  btn.disabled=true; btn.textContent='Saving...';
+  const obj={name,role:document.getElementById('m-role').value,status:document.getElementById('m-status').value,color:document.getElementById('m-color').value};
+  if(editingMember){
+    await sb.from('members').update(obj).eq('id',editingMember);
+  } else {
+    await sb.from('members').insert(obj);
+  }
+  btn.disabled=false; btn.textContent='Save member';
+  closeModal('memberModal');
+  await loadMembers();
+  toast('Member saved!');
+}
+async function deleteMember(id){
+  if(!confirm('Remove this member?'))return;
+  await sb.from('members').delete().eq('id',id);
+  await loadMembers();
+  toast('Member removed');
+}
+
+// ── ANNOUNCEMENTS ─────────────────────────────────────
+async function loadAnns(){
+  const {data}=await sb.from('announcements').select('*').order('id',{ascending:false});
+  document.getElementById('ov-ann').textContent=data?data.length:0;
+  const list=document.getElementById('annList');
+  if(!data||data.length===0){list.innerHTML='<div class="loading">No announcements yet.</div>';return}
+  list.innerHTML=data.map(a=>`
+    <div class="ann-item">
+      <div class="ann-icon">${(a.tag||'📢').split(' ')[0]}</div>
+      <div class="ann-body">
+        <div class="ann-title">${a.title}</div>
+        <div class="ann-preview">${a.body||''}</div>
+        <div class="ann-meta">${(a.tag||'').split(' ').slice(1).join(' ')} · ${a.date||''}</div>
+      </div>
+      <div class="ann-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openEditAnn(${a.id},'${encodeURIComponent(a.title)}','${encodeURIComponent(a.body||'')}','${a.tag||'📢 NEWS'}','${a.date||''}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteAnn(${a.id})">Delete</button>
+      </div>
+    </div>`).join('');
+}
+function openAddAnn(){
+  editingAnn=null;
+  document.getElementById('annModalTitle').textContent='New announcement';
+  document.getElementById('a-title').value='';
+  document.getElementById('a-body').value='';
+  document.getElementById('a-tag').value='📢 NEWS';
+  document.getElementById('a-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('annModal').classList.remove('hidden');
+}
+function openEditAnn(id,title,body,tag,date){
+  editingAnn=id;
+  document.getElementById('annModalTitle').textContent='Edit announcement';
+  document.getElementById('a-title').value=decodeURIComponent(title);
+  document.getElementById('a-body').value=decodeURIComponent(body);
+  document.getElementById('a-tag').value=tag;
+  document.getElementById('a-date').value=date||'';
+  document.getElementById('annModal').classList.remove('hidden');
+}
+async function saveAnn(){
+  const title=document.getElementById('a-title').value.trim();
+  if(!title)return;
+  const btn=document.getElementById('saveAnnBtn');
+  btn.disabled=true; btn.textContent='Saving...';
+  const d=document.getElementById('a-date').value;
+  const fmt=d?new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+  const obj={title,body:document.getElementById('a-body').value,tag:document.getElementById('a-tag').value,date:fmt};
+  if(editingAnn){
+    await sb.from('announcements').update(obj).eq('id',editingAnn);
+  } else {
+    await sb.from('announcements').insert(obj);
+  }
+  btn.disabled=false; btn.textContent='Post announcement';
+  closeModal('annModal');
+  await loadAnns();
+  toast('Announcement saved!');
+}
+async function deleteAnn(id){
+  if(!confirm('Delete this announcement?'))return;
+  await sb.from('announcements').delete().eq('id',id);
+  await loadAnns();
+  toast('Announcement deleted');
+}
+
+// ── RULES ─────────────────────────────────────────────
+async function loadRules(){
+  const {data}=await sb.from('rules').select('*').order('id');
+  document.getElementById('ov-rules').textContent=data?data.length:0;
+  const list=document.getElementById('ruleList');
+  if(!data||data.length===0){list.innerHTML='<div class="loading">No rules yet.</div>';return}
+  list.innerHTML=data.map((r,i)=>`
+    <div style="display:flex;align-items:flex-start;gap:.875rem;padding:.875rem 0;border-bottom:1px solid var(--border)">
+      <div style="width:28px;height:28px;background:var(--surface2);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--accent);font-size:.8rem;flex-shrink:0;border:1px solid var(--border)">${i+1}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:500;font-size:.875rem">${r.title}</div>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:.2rem">${r.body||''}</div>
+      </div>
+      <div style="display:flex;gap:.35rem;flex-shrink:0">
+        <button class="btn btn-ghost btn-sm" onclick="openEditRule(${r.id},'${encodeURIComponent(r.title)}','${encodeURIComponent(r.body||'')}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRule(${r.id})">Delete</button>
+      </div>
+    </div>`).join('');
+}
+function openAddRule(){
+  editingRule=null;
+  document.getElementById('ruleModalTitle').textContent='Add rule';
+  document.getElementById('r-title').value='';
+  document.getElementById('r-body').value='';
+  document.getElementById('ruleModal').classList.remove('hidden');
+}
+function openEditRule(id,title,body){
+  editingRule=id;
+  document.getElementById('ruleModalTitle').textContent='Edit rule';
+  document.getElementById('r-title').value=decodeURIComponent(title);
+  document.getElementById('r-body').value=decodeURIComponent(body);
+  document.getElementById('ruleModal').classList.remove('hidden');
+}
+async function saveRule(){
+  const title=document.getElementById('r-title').value.trim();
+  if(!title)return;
+  const btn=document.getElementById('saveRuleBtn');
+  btn.disabled=true; btn.textContent='Saving...';
+  const obj={title,body:document.getElementById('r-body').value};
+  if(editingRule){
+    await sb.from('rules').update(obj).eq('id',editingRule);
+  } else {
+    await sb.from('rules').insert(obj);
+  }
+  btn.disabled=false; btn.textContent='Save rule';
+  closeModal('ruleModal');
+  await loadRules();
+  toast('Rule saved!');
+}
+async function deleteRule(id){
+  if(!confirm('Delete this rule?'))return;
+  await sb.from('rules').delete().eq('id',id);
+  await loadRules();
+  toast('Rule deleted');
+}
+
+// ── UTILS ─────────────────────────────────────────────
+function nav(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+}
+function closeModal(id){document.getElementById(id).classList.add('hidden')}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.add('hidden')}));
+
+function toast(msg,type='green'){
+  const t=document.getElementById('toast');
+  const dot=document.getElementById('toastDot');
+  document.getElementById('toastMsg').textContent=msg;
+  dot.className='toast-dot'+(type==='red'?' red':'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+</script>
+</body>
+</html>

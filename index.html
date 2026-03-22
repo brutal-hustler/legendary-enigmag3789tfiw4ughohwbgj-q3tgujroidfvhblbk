@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>School Server</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--surface:#16191f;--surface2:#1d2129;--border:#2a2d35;
+  --accent:#5865F2;--accent2:#7289da;--text:#e3e5e8;--muted:#8e9297;
+  --green:#3ba55d;--red:#ed4245;--yellow:#faa61a;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.hidden{display:none!important}
+
+/* LOGIN */
+.login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2.5rem;width:100%;max-width:380px;text-align:center}
+.login-logo{width:64px;height:64px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:28px}
+.login-card h2{font-size:1.3rem;font-weight:600;margin-bottom:.4rem}
+.login-card p{color:var(--muted);font-size:.875rem;margin-bottom:1.75rem}
+.login-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.7rem 1rem;color:var(--text);font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;margin-bottom:.5rem}
+.login-input:focus{border-color:var(--accent)}
+.login-btn{width:100%;background:var(--accent);border:none;border-radius:8px;padding:.75rem;color:#fff;font-size:.95rem;font-weight:600;cursor:pointer;margin-top:.375rem;transition:opacity .2s;font-family:'DM Sans',sans-serif}
+.login-btn:hover{opacity:.9}
+.login-btn:disabled{opacity:.5;cursor:not-allowed}
+.login-error{color:var(--red);font-size:.8rem;margin-top:.5rem}
+
+/* NAV */
+.navbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;gap:1.5rem;height:56px;position:sticky;top:0;z-index:10}
+.nav-logo{display:flex;align-items:center;gap:.6rem;font-weight:600;font-size:1rem;margin-right:.5rem}
+.nav-logo .dot{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-links{display:flex;gap:.25rem;flex:1}
+.nav-link{padding:.4rem .75rem;border-radius:6px;font-size:.875rem;color:var(--muted);cursor:pointer;transition:all .15s;font-weight:500}
+.nav-link:hover,.nav-link.active{background:var(--surface2);color:var(--text)}
+.nav-link.active{color:var(--accent)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:.75rem}
+.online-dot{width:8px;height:8px;background:var(--green);border-radius:50%;display:inline-block}
+.logout-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);padding:.35rem .75rem;font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.logout-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* CONTENT */
+.content{padding:2rem 1.5rem;max-width:960px;margin:0 auto;width:100%}
+.page{display:none}
+.page.active{display:block}
+
+/* HOME */
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:2rem}
+.hero-icon{width:80px;height:80px;background:var(--accent);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0}
+.hero h1{font-size:1.75rem;font-weight:600;margin-bottom:.5rem}
+.hero p{color:var(--muted);font-size:.95rem;line-height:1.6}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem}
+.stat-card .label{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem}
+.stat-card .value{font-size:1.5rem;font-weight:600}
+.stat-card .value.green{color:var(--green)}
+.stat-card .value.accent{color:var(--accent)}
+.invite-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;display:flex;align-items:center;gap:1rem}
+.invite-link{font-family:'DM Mono',monospace;font-size:.875rem;background:var(--surface2);padding:.5rem .875rem;border-radius:6px;flex:1;color:var(--accent2);border:1px solid var(--border)}
+.copy-btn{background:var(--accent);border:none;border-radius:6px;color:#fff;padding:.5rem 1rem;cursor:pointer;font-size:.875rem;font-weight:500;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:opacity .2s}
+.copy-btn:hover{opacity:.85}
+
+/* SECTION HEADER */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.section-header h2{font-size:1.1rem;font-weight:600}
+.badge{background:var(--accent);color:#fff;font-size:.7rem;padding:.2rem .5rem;border-radius:20px;font-weight:600}
+
+/* ANNOUNCEMENTS */
+.announce-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:.875rem;border-left:3px solid var(--accent)}
+.announce-card.pinned{border-left-color:var(--yellow)}
+.announce-card.pinned .tag{background:#faa61a20;color:var(--yellow)}
+.announce-header{display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem}
+.tag{font-size:.7rem;padding:.2rem .6rem;border-radius:20px;background:#5865f220;color:var(--accent);font-weight:600;letter-spacing:.03em}
+.announce-date{font-size:.75rem;color:var(--muted);margin-left:auto}
+.announce-title{font-weight:600;font-size:.95rem;margin-bottom:.35rem}
+.announce-body{color:var(--muted);font-size:.875rem;line-height:1.6}
+
+/* MEMBERS */
+.members-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.875rem}
+.member-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem;display:flex;align-items:center;gap:.875rem}
+.avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.9rem;flex-shrink:0}
+.member-info .name{font-weight:500;font-size:.9rem}
+.member-info .role-label{font-size:.75rem;margin-top:.15rem}
+.role-label.owner{color:#ffd700}
+.role-label.admin{color:var(--red)}
+.role-label.mod{color:var(--accent2)}
+.role-label.member{color:var(--muted)}
+.status-dot{width:10px;height:10px;border-radius:50%;margin-left:auto;flex-shrink:0}
+.status-dot.online{background:var(--green)}
+.status-dot.idle{background:var(--yellow)}
+.status-dot.offline{background:#4f545c}
+.filter-row{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
+.filter-btn{background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--muted);padding:.35rem .75rem;font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* RULES */
+.rule-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:.875rem;display:flex;gap:1rem;align-items:flex-start}
+.rule-num{width:32px;height:32px;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--accent);font-size:.875rem;flex-shrink:0;border:1px solid var(--border)}
+.rule-title{font-weight:600;font-size:.9rem;margin-bottom:.3rem}
+.rule-body{color:var(--muted);font-size:.85rem;line-height:1.6}
+
+/* LOADING */
+.loading{text-align:center;padding:3rem;color:var(--muted);font-size:.9rem}
+.spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">🎓</div>
+    <h2>Welcome Back</h2>
+    <p>Enter the server password to access the site</p>
+    <input class="login-input" type="password" id="pwInput" placeholder="Password" />
+    <div class="login-error hidden" id="loginErr">Incorrect password. Try again.</div>
+    <button class="login-btn" id="loginBtn">Enter Server</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" class="hidden" style="display:none;flex-direction:column;min-height:100vh">
+  <nav class="navbar">
+    <div class="nav-logo"><div class="dot">🎓</div> <span id="nav-server-name">School Server</span></div>
+    <div class="nav-links">
+      <div class="nav-link active" onclick="showPage('home',this)">Home</div>
+      <div class="nav-link" onclick="showPage('announcements',this)">Announcements</div>
+      <div class="nav-link" onclick="showPage('members',this)">Members</div>
+      <div class="nav-link" onclick="showPage('rules',this)">Rules</div>
+    </div>
+    <div class="nav-right">
+      <span class="online-dot"></span>
+      <span style="font-size:.8rem;color:var(--muted)">Online</span>
+      <button class="logout-btn" onclick="logout()">Log out</button>
+    </div>
+  </nav>
+
+  <div class="content">
+
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="hero">
+        <div class="hero-icon">🎓</div>
+        <div>
+          <h1 id="home-server-name">School Server</h1>
+          <p id="home-desc">A private space for our class and friends.</p>
+        </div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="label">Total Members</div><div class="value accent" id="stat-members">—</div></div>
+        <div class="stat-card"><div class="label">Online Now</div><div class="value green" id="stat-online">—</div></div>
+        <div class="stat-card"><div class="label">Announcements</div><div class="value" id="stat-ann">—</div></div>
+      </div>
+      <div class="invite-card">
+        <span style="font-size:.875rem;color:var(--muted);white-space:nowrap">Invite link</span>
+        <div class="invite-link" id="invite-link-display">discord.gg/yourcode</div>
+        <button class="copy-btn" onclick="copyInvite()">Copy</button>
+      </div>
+    </div>
+
+    <!-- ANNOUNCEMENTS -->
+    <div class="page" id="page-announcements">
+      <div class="section-header">
+        <h2>Announcements</h2>
+        <span class="badge" id="ann-badge">0</span>
+      </div>
+      <div id="annContainer"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+    </div>
+
+    <!-- MEMBERS -->
+    <div class="page" id="page-members">
+      <div class="section-header"><h2>Members</h2></div>
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="filterMembers('all',this)">All</button>
+        <button class="filter-btn" onclick="filterMembers('online',this)">Online</button>
+        <button class="filter-btn" onclick="filterMembers('owner',this)">Owners</button>
+        <button class="filter-btn" onclick="filterMembers('mod',this)">Mods</button>
+      </div>
+      <div class="members-grid" id="membersContainer"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+    </div>
+
+    <!-- RULES -->
+    <div class="page" id="page-rules">
+      <div class="section-header"><h2>Server Rules</h2></div>
+      <div id="rulesContainer"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://ccepcamixgfvxgxwxdcv.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNjZXBjYW1peGdmdnhneHd4ZGN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTA4NjksImV4cCI6MjA4OTY4Njg2OX0.381K3TpmGoSdhgUP-ntAloGTxiPov5cqONiRtQXwlXs';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let allMembers = [];
+let inviteLink = 'discord.gg/yourcode';
+
+async function loadSettings() {
+  const { data } = await sb.from('settings').select('*');
+  if (!data) return;
+  const s = {};
+  data.forEach(r => s[r.key] = r.value);
+  if (s.server_name) {
+    document.getElementById('nav-server-name').textContent = s.server_name;
+    document.getElementById('home-server-name').textContent = s.server_name;
+    document.title = s.server_name;
+  }
+  if (s.description) document.getElementById('home-desc').textContent = s.description;
+  if (s.invite_link) {
+    inviteLink = s.invite_link;
+    document.getElementById('invite-link-display').textContent = s.invite_link;
+  }
+  return s;
+}
+
+async function checkPassword(pw) {
+  const { data } = await sb.from('settings').select('value').eq('key', 'password').single();
+  return data && data.value === pw;
+}
+
+async function loadMembers() {
+  const { data } = await sb.from('members').select('*').order('id');
+  if (!data) return;
+  allMembers = data;
+  document.getElementById('stat-members').textContent = data.length;
+  document.getElementById('stat-online').textContent = data.filter(m => m.status === 'online').length;
+  renderMembers('all');
+}
+
+async function loadAnnouncements() {
+  const { data } = await sb.from('announcements').select('*').order('id', { ascending: false });
+  const container = document.getElementById('annContainer');
+  if (!data || data.length === 0) { container.innerHTML = '<div class="loading">No announcements yet.</div>'; return; }
+  document.getElementById('ann-badge').textContent = data.length;
+  document.getElementById('stat-ann').textContent = data.length;
+  container.innerHTML = data.map(a => {
+    const isPinned = a.tag && a.tag.includes('PINNED');
+    return `<div class="announce-card ${isPinned ? 'pinned' : ''}">
+      <div class="announce-header"><span class="tag">${a.tag || '📢 NEWS'}</span><span class="announce-date">${a.date || ''}</span></div>
+      <div class="announce-title">${a.title}</div>
+      <div class="announce-body">${a.body || ''}</div>
+    </div>`;
+  }).join('');
+}
+
+async function loadRules() {
+  const { data } = await sb.from('rules').select('*').order('id');
+  const container = document.getElementById('rulesContainer');
+  if (!data || data.length === 0) { container.innerHTML = '<div class="loading">No rules yet.</div>'; return; }
+  container.innerHTML = data.map((r, i) => `
+    <div class="rule-card">
+      <div class="rule-num">${i + 1}</div>
+      <div><div class="rule-title">${r.title}</div><div class="rule-body">${r.body || ''}</div></div>
+    </div>`).join('');
+}
+
+function initials(n) { return n.split(' ').map(w => w[0]).join('').toUpperCase(); }
+
+function renderMembers(filter) {
+  const list = filter === 'all' ? allMembers : allMembers.filter(m => {
+    if (filter === 'online') return m.status === 'online';
+    return m.role === filter;
+  });
+  const container = document.getElementById('membersContainer');
+  if (list.length === 0) { container.innerHTML = '<div class="loading">No members found.</div>'; return; }
+  container.innerHTML = list.map(m => `
+    <div class="member-card">
+      <div class="avatar" style="background:${m.color || '#5865F2'}22;color:${m.color || '#5865F2'}">${initials(m.name)}</div>
+      <div class="member-info">
+        <div class="name">${m.name}</div>
+        <div class="role-label ${m.role}">${m.role.charAt(0).toUpperCase() + m.role.slice(1)}</div>
+      </div>
+      <div class="status-dot ${m.status || 'offline'}"></div>
+    </div>`).join('');
+}
+
+function filterMembers(f, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMembers(f);
+}
+
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+function copyInvite() {
+  navigator.clipboard && navigator.clipboard.writeText(inviteLink);
+  const btn = document.querySelector('.copy-btn');
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy', 2000);
+}
+
+function logout() {
+  sessionStorage.removeItem('server_auth');
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('pwInput').value = '';
+}
+
+async function login() {
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginErr');
+  const pw = document.getElementById('pwInput').value;
+  if (!pw) return;
+  btn.disabled = true;
+  btn.textContent = 'Checking...';
+  err.classList.add('hidden');
+  const ok = await checkPassword(pw);
+  if (ok) {
+    sessionStorage.setItem('server_auth', '1');
+    document.getElementById('loginScreen').style.display = 'none';
+    const app = document.getElementById('mainApp');
+    app.classList.remove('hidden');
+    app.style.display = 'flex';
+    await loadSettings();
+    await Promise.all([loadMembers(), loadAnnouncements(), loadRules()]);
+  } else {
+    err.classList.remove('hidden');
+    btn.disabled = false;
+    btn.textContent = 'Enter Server';
+  }
+}
+
+document.getElementById('loginBtn').onclick = login;
+document.getElementById('pwInput').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+
+// Auto-login if already authenticated this session
+if (sessionStorage.getItem('server_auth') === '1') {
+  document.getElementById('loginScreen').style.display = 'none';
+  const app = document.getElementById('mainApp');
+  app.classList.remove('hidden');
+  app.style.display = 'flex';
+  loadSettings().then(() => Promise.all([loadMembers(), loadAnnouncements(), loadRules()]));
+}
+</script>
+</body>
+</html>
