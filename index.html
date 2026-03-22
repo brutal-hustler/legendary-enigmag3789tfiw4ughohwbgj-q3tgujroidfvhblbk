@@ -242,7 +242,9 @@ textarea.form-input{resize:vertical;min-height:70px;line-height:1.5}
     </div>
 
     <div class="page" id="page-bounties">
-      <div class="section-header"><h2><span class="ms">emoji_events</span>Bounties</h2></div>
+      <div class="section-header"><h2><span class="ms">emoji_events</span>Bounties</h2>
+        <button class="btn btn-primary" onclick="openSubmitBounty()" style="font-size:.775rem;padding:.35rem .75rem"><span class="ms">add</span>Submit bounty</button>
+      </div>
       <div id="bountiesContainer"><div class="loading"><div class="spinner"></div>Loading...</div></div>
     </div>
 
@@ -299,6 +301,36 @@ textarea.form-input{resize:vertical;min-height:70px;line-height:1.5}
     <div style="padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.6rem;justify-content:flex-end">
       <button class="btn btn-ghost" onclick="closeModal('claimModal')">Cancel</button>
       <button class="btn btn-primary" id="submitClaimBtn" onclick="submitClaim()"><span class="ms">send</span>Submit request</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUBMIT BOUNTY MODAL -->
+<div class="modal-overlay hidden" id="submitBountyModal">
+  <div class="modal" style="max-width:460px">
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div style="font-weight:600;font-size:.95rem;display:flex;align-items:center;gap:.4rem"><span class="ms">emoji_events</span>Submit a bounty</div>
+      <button onclick="closeModal('submitBountyModal')" style="background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center"><span class="ms">close</span></button>
+    </div>
+    <div style="padding:1.5rem">
+      <div style="background:var(--surface2);border:1px solid var(--border);padding:.75rem;margin-bottom:1.25rem;font-size:.8rem;color:var(--muted);display:flex;align-items:flex-start;gap:.5rem">
+        <span class="ms" style="font-size:16px;color:var(--accent);margin-top:1px">info</span>
+        Bounties go live immediately. A mod can close or remove them if needed.
+      </div>
+      <div class="form-group"><label>Title</label><input class="form-input" id="sb-title" placeholder="e.g. Design a server banner" maxlength="100"/></div>
+      <div class="form-group"><label>Description</label><textarea class="form-input" id="sb-desc" placeholder="What needs to be done? Be specific..." maxlength="400"></textarea></div>
+      <div class="form-group"><label>Reward <span style="color:var(--muted);font-weight:400">(optional)</span></label><input class="form-input" id="sb-reward" placeholder="e.g. Custom role, shoutout, bragging rights..." maxlength="100"/></div>
+      <div class="form-group"><label>Difficulty</label>
+        <select class="form-input" id="sb-difficulty" style="cursor:pointer">
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+    </div>
+    <div style="padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.6rem;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal('submitBountyModal')">Cancel</button>
+      <button class="btn btn-primary" id="submitBountyBtn" onclick="submitBounty()"><span class="ms">send</span>Post bounty</button>
     </div>
   </div>
 </div>
@@ -514,6 +546,33 @@ async function loadBounties(){
       </div>
       ${b.description?`<div style="font-size:.838rem;color:var(--muted);line-height:1.6">${b.description}</div>`:''}
     </div>`).join('');
+}
+
+function openSubmitBounty(){
+  document.getElementById('sb-title').value='';
+  document.getElementById('sb-desc').value='';
+  document.getElementById('sb-reward').value='';
+  document.getElementById('sb-difficulty').value='easy';
+  document.getElementById('submitBountyModal').classList.remove('hidden');
+}
+
+async function submitBounty(){
+  const title=document.getElementById('sb-title').value.trim();
+  if(!title){toast('Give your bounty a title first','error');return;}
+  const btn=document.getElementById('submitBountyBtn');
+  btn.disabled=true;btn.innerHTML='<span class="ms">sync</span>Posting...';
+  const{error}=await sb.from('bounties').insert({
+    title,
+    description:document.getElementById('sb-desc').value||null,
+    reward:document.getElementById('sb-reward').value||null,
+    difficulty:document.getElementById('sb-difficulty').value,
+    status:'open',
+  });
+  btn.disabled=false;btn.innerHTML='<span class="ms">send</span>Post bounty';
+  if(error){toast('Something went wrong. Try again.','error');return;}
+  closeModal('submitBountyModal');
+  await loadBounties();
+  toast('Bounty posted!');
 }
 
 function initials(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase();}
