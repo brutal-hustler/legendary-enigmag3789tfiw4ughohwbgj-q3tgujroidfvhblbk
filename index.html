@@ -392,6 +392,7 @@ const THEMES={
   forest:{label:'Forest',bg:'#0d1210',surface:'#141c18',surface2:'#1c2820',border:'#253028',accent:'#3ba55d',text:'#d8ede0',muted:'#7a9e82'},
   crimson:{label:'Crimson',bg:'#130c0c',surface:'#1c1010',surface2:'#261616',border:'#3a2020',accent:'#ed4245',text:'#f0dede',muted:'#a07878'},
   ocean:{label:'Ocean',bg:'#091218',surface:'#0e1c26',surface2:'#142433',border:'#1e3040',accent:'#0099cc',text:'#d0eaf5',muted:'#6899aa'},
+  hell:{label:'Hell',bg:'#07121d',surface:'#1e100d',surface2:'#2d1710',border:'#4a2518',accent:'#fbaa46',text:'#f5e6d0',muted:'#a07060',bgImage:'bg-hell.jpg'},
 };
 
 let customThemesCache=[];
@@ -405,14 +406,22 @@ function buildAllThemes(){
 
 function applyTheme(s,customThemes){
   if(customThemes)customThemesCache=customThemes;
-  // Personal preference overrides site default
   const themeKey=personalTheme||(s&&s.theme)||'discord';
   const fontKey=personalFont||(s&&s.font)||'jetbrains';
   const all=buildAllThemes();
   const t=all[themeKey]||THEMES.discord;
   const r=document.documentElement;
-  Object.entries(t).forEach(([k,v])=>{if(k!=='label')r.style.setProperty('--'+k,v);});
+  Object.entries(t).forEach(([k,v])=>{if(k!=='label'&&k!=='bgImage')r.style.setProperty('--'+k,v);});
   r.style.setProperty('--font',FONTS[fontKey]||FONTS.jetbrains);
+  // Background image support
+  if(t.bgImage){
+    document.body.style.backgroundImage=`url('${t.bgImage}')`;
+    document.body.style.backgroundSize='cover';
+    document.body.style.backgroundAttachment='fixed';
+    document.body.style.backgroundPosition='center';
+  } else {
+    document.body.style.backgroundImage='none';
+  }
 }
 
 // Load personal prefs from localStorage on startup
