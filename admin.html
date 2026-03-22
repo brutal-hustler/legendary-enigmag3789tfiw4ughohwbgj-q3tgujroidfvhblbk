@@ -293,15 +293,53 @@ tr:hover td{background:var(--surface2)}
 
     <!-- APPEARANCE -->
     <div class="panel" id="panel-appearance">
-      <div class="page-header"><h1><span class="ms">palette</span>Appearance</h1><p>Changes apply to both the public site and this dashboard instantly.</p></div>
+      <div class="page-header"><h1><span class="ms">palette</span>Appearance</h1><p>Set the default theme and font for all visitors. Members can override this with their own preference on the public site.</p></div>
       <div class="card">
         <div class="card-header"><span class="card-title"><span class="ms">palette</span>Colour theme</span></div>
         <div class="theme-grid" id="themeGrid"></div>
-        <button class="btn btn-primary" onclick="saveAppearance()"><span class="ms">save</span>Save appearance</button>
+        <div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:.6rem">
+          <button class="btn btn-primary" onclick="saveAppearance()"><span class="ms">save</span>Save as site default</button>
+          <span style="font-size:.75rem;color:var(--muted)">Applies to all visitors who haven't set a personal preference</span>
+        </div>
       </div>
       <div class="card">
         <div class="card-header"><span class="card-title"><span class="ms">text_fields</span>Font</span></div>
         <div class="font-grid" id="fontGrid"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="ms">brush</span>Custom theme builder</span>
+          <button class="btn btn-ghost btn-sm" onclick="resetCustomBuilder()"><span class="ms">refresh</span>Reset</button>
+        </div>
+        <p style="font-size:.775rem;color:var(--muted);margin-bottom:1.25rem">Build your own colour theme. Pick colours below, give it a name, and save — it'll appear in the theme picker above.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.875rem;margin-bottom:1.25rem">
+          <div class="form-group" style="margin:0"><label>Theme name</label><input class="form-control" id="ct-name" placeholder="e.g. Pink Neon" /></div>
+          <div class="form-group" style="margin:0"><label>Background</label><div style="display:flex;gap:.5rem;align-items:center"><input class="form-control" id="ct-bg" type="color" value="#0f1117" style="width:44px;padding:.2rem;height:36px;cursor:pointer;flex-shrink:0"><input class="form-control" id="ct-bg-hex" value="#0f1117" style="flex:1;font-size:.775rem" oninput="syncColor('ct-bg','ct-bg-hex')"></div></div>
+          <div class="form-group" style="margin:0"><label>Surface</label><div style="display:flex;gap:.5rem;align-items:center"><input class="form-control" id="ct-surface" type="color" value="#16191f" style="width:44px;padding:.2rem;height:36px;cursor:pointer;flex-shrink:0"><input class="form-control" id="ct-surface-hex" value="#16191f" style="flex:1;font-size:.775rem" oninput="syncColor('ct-surface','ct-surface-hex')"></div></div>
+          <div class="form-group" style="margin:0"><label>Surface 2</label><div style="display:flex;gap:.5rem;align-items:center"><input class="form-control" id="ct-surface2" type="color" value="#1d2129" style="width:44px;padding:.2rem;height:36px;cursor:pointer;flex-shrink:0"><input class="form-control" id="ct-surface2-hex" value="#1d2129" style="flex:1;font-size:.775rem" oninput="syncColor('ct-surface2','ct-surface2-hex')"></div></div>
+          <div class="form-group" style="margin:0"><label>Border</label><div style="display:flex;gap:.5rem;align-items:center"><input class="form-control" id="ct-border" type="color" value="#2a2d35" style="width:44px;padding:.2rem;height:36px;cursor:pointer;flex-shrink:0"><input class="form-control" id="ct-border-hex" value="#2a2d35" style="flex:1;font-size:.775rem" oninput="syncColor('ct-border','ct-border-hex')"></div></div>
+          <div class="form-group" style="margin:0"><label>Accent</label><div style="display:flex;gap:.5rem;align-items:center"><input class="form-control" id="ct-accent" type="color" value="#5865F2" style="width:44px;padding:.2rem;height:36px;cursor:pointer;flex-shrink:0"><input class="form-control" id="ct-accent-hex" value="#5865F2" style="flex:1;font-size:.775rem" oninput="syncColor('ct-accent','ct-accent-hex')"></div></div>
+          <div class="form-group" style="margin:0"><label>Text</label><div style="display:flex;gap:.5rem;align-items:center"><input class="form-control" id="ct-text" type="color" value="#e3e5e8" style="width:44px;padding:.2rem;height:36px;cursor:pointer;flex-shrink:0"><input class="form-control" id="ct-text-hex" value="#e3e5e8" style="flex:1;font-size:.775rem" oninput="syncColor('ct-text','ct-text-hex')"></div></div>
+          <div class="form-group" style="margin:0"><label>Muted text</label><div style="display:flex;gap:.5rem;align-items:center"><input class="form-control" id="ct-muted" type="color" value="#8e9297" style="width:44px;padding:.2rem;height:36px;cursor:pointer;flex-shrink:0"><input class="form-control" id="ct-muted-hex" value="#8e9297" style="flex:1;font-size:.775rem" oninput="syncColor('ct-muted','ct-muted-hex')"></div></div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);padding:1rem;margin-bottom:1.25rem">
+          <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.6rem">Preview</div>
+          <div id="themePreview" style="padding:1rem;border:1px solid #2a2d35;background:#0f1117">
+            <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+              <div style="width:36px;height:36px;background:#5865F2;display:flex;align-items:center;justify-content:center"><span class="ms" style="color:#fff;font-size:18px">forum</span></div>
+              <div><div style="font-weight:600;font-size:.875rem;color:#e3e5e8">School Server</div><div style="font-size:.72rem;color:#8e9297">Your custom theme</div></div>
+            </div>
+            <div style="display:flex;gap:.5rem">
+              <div style="background:#5865F2;color:#fff;padding:.3rem .7rem;font-size:.75rem">Accent button</div>
+              <div style="background:#1d2129;border:1px solid #2a2d35;color:#e3e5e8;padding:.3rem .7rem;font-size:.75rem">Ghost button</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+          <button class="btn btn-ghost" onclick="previewCustomTheme()"><span class="ms">visibility</span>Preview live</button>
+          <button class="btn btn-primary" onclick="saveCustomTheme()"><span class="ms">add</span>Save as new theme</button>
+        </div>
+        <div id="customThemesList" style="margin-top:1.25rem"></div>
       </div>
     </div>
 
@@ -437,50 +475,147 @@ const FONTS={
   datatype:{label:'Datatype',sample:'// similar to JB',css:"'JetBrains Mono',monospace"},
 };
 
-function applyTheme(theme,font){
+function applyTheme(theme,font,customThemes=[]){
   const r=document.documentElement;
-  const t=THEMES[theme]||THEMES.discord;
-  Object.entries(t).forEach(([k,v])=>{if(k!=='label')r.style.setProperty('--'+k,v);});
-  const f=FONTS[font]||FONTS.jetbrains;
-  r.style.setProperty('--font',f.css);
+  const allThemes={...THEMES};
+  customThemes.forEach(t=>allThemes['custom_'+t.id]={label:t.name,bg:t.bg,surface:t.surface,surface2:t.surface2,border:t.border,accent:t.accent,text:t.text_color,muted:t.muted});
+  const t=allThemes[theme]||THEMES.discord;
+  Object.entries(t).forEach(([k,v])=>{if(k!=='label')r.style.setProperty('--'+(k==='text'?'text':k),v);});
+  r.style.setProperty('--font',FONTS[font]?.css||FONTS.jetbrains.css);
 }
 
-function buildAppearanceUI(){
+let customThemesCache=[];
+
+async function buildAppearanceUI(){
+  const{data}=await sb.from('custom_themes').select('*').order('id');
+  customThemesCache=data||[];
+  const allThemes={...THEMES};
+  customThemesCache.forEach(t=>allThemes['custom_'+t.id]={label:t.name,bg:t.bg,surface:t.surface,surface2:t.surface2,border:t.border,accent:t.accent,text:t.text_color,muted:t.muted});
+
   const tg=document.getElementById('themeGrid');
-  tg.innerHTML=Object.entries(THEMES).map(([id,t])=>`
-    <div class="theme-swatch${id===currentTheme?' active':''}" onclick="selectTheme('${id}')" id="ts-${id}">
+  tg.innerHTML=Object.entries(allThemes).map(([id,t])=>`
+    <div class="theme-swatch${id===currentTheme?' active':''}" onclick="selectTheme('${id}')" id="ts-${id}" style="position:relative">
       <div class="swatch-preview">
         <span style="background:${t.bg}"></span>
         <span style="background:${t.surface}"></span>
         <span style="background:${t.accent}"></span>
       </div>
       <div class="swatch-label">${t.label}</div>
+      ${id.startsWith('custom_')?`<button onclick="event.stopPropagation();deleteCustomTheme(${id.replace('custom_','')})" style="position:absolute;top:3px;right:3px;background:none;border:none;color:var(--muted);cursor:pointer;padding:1px;display:flex;align-items:center"><span class="ms" style="font-size:13px">close</span></button>`:''}
     </div>`).join('');
+
   const fg=document.getElementById('fontGrid');
   fg.innerHTML=Object.entries(FONTS).map(([id,f])=>`
     <div class="font-option${id===currentFont?' active':''}" onclick="selectFont('${id}')" id="fo-${id}" style="font-family:${f.css}">
       <div class="font-name">${f.label}</div>
       <div class="font-sample">${f.sample}</div>
     </div>`).join('');
+
+  updatePreview();
 }
 
 function selectTheme(id){
   currentTheme=id;
   document.querySelectorAll('.theme-swatch').forEach(s=>s.classList.remove('active'));
-  document.getElementById('ts-'+id).classList.add('active');
-  applyTheme(id,currentFont);
+  const el=document.getElementById('ts-'+id);if(el)el.classList.add('active');
+  applyTheme(id,currentFont,customThemesCache);
 }
 function selectFont(id){
   currentFont=id;
   document.querySelectorAll('.font-option').forEach(f=>f.classList.remove('active'));
-  document.getElementById('fo-'+id).classList.add('active');
-  applyTheme(currentTheme,id);
+  const el=document.getElementById('fo-'+id);if(el)el.classList.add('active');
+  applyTheme(currentTheme,id,customThemesCache);
 }
 async function saveAppearance(){
   await sb.from('settings').upsert({key:'theme',value:currentTheme},{onConflict:'key'});
   await sb.from('settings').upsert({key:'font',value:currentFont},{onConflict:'key'});
-  toast('Appearance saved! Public site will update on next load.');
+  toast('Site default saved! Members without a personal preference will see this.');
 }
+
+// ── CUSTOM THEME BUILDER ──────────────────────────────
+function syncColor(colorId,hexId){
+  const hex=document.getElementById(hexId).value;
+  if(/^#[0-9a-fA-F]{6}$/.test(hex))document.getElementById(colorId).value=hex;
+  updatePreview();
+}
+
+function getBuilderValues(){
+  return{
+    name:document.getElementById('ct-name').value||'My Theme',
+    bg:document.getElementById('ct-bg').value,
+    surface:document.getElementById('ct-surface').value,
+    surface2:document.getElementById('ct-surface2').value,
+    border:document.getElementById('ct-border').value,
+    accent:document.getElementById('ct-accent').value,
+    text_color:document.getElementById('ct-text').value,
+    muted:document.getElementById('ct-muted').value,
+  };
+}
+
+function updatePreview(){
+  const v=getBuilderValues();
+  const p=document.getElementById('themePreview');
+  p.style.background=v.bg;p.style.borderColor=v.border;
+  p.querySelectorAll('[data-preview-text]').forEach(el=>el.style.color=v.text_color);
+  // Update color pickers when hex inputs change
+  ['bg','surface','surface2','border','accent','text','muted'].forEach(k=>{
+    const colorEl=document.getElementById('ct-'+k);
+    const hexEl=document.getElementById('ct-'+k+'-hex');
+    if(colorEl&&hexEl){
+      colorEl.addEventListener('input',()=>{hexEl.value=colorEl.value;updatePreview();});
+    }
+  });
+  p.innerHTML=`
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+      <div style="width:32px;height:32px;background:${v.accent};display:flex;align-items:center;justify-content:center"><span class="ms" style="color:#fff;font-size:16px">forum</span></div>
+      <div><div style="font-weight:600;font-size:.838rem;color:${v.text_color}">${v.name}</div><div style="font-size:.7rem;color:${v.muted}">Custom theme preview</div></div>
+    </div>
+    <div style="background:${v.surface};border:1px solid ${v.border};padding:.6rem;margin-bottom:.6rem;font-size:.775rem;color:${v.muted}">Surface card · muted text</div>
+    <div style="display:flex;gap:.4rem">
+      <div style="background:${v.accent};color:#fff;padding:.25rem .6rem;font-size:.72rem">Accent</div>
+      <div style="background:${v.surface2};border:1px solid ${v.border};color:${v.text_color};padding:.25rem .6rem;font-size:.72rem">Ghost</div>
+    </div>`;
+}
+
+function previewCustomTheme(){
+  const v=getBuilderValues();
+  const r=document.documentElement;
+  r.style.setProperty('--bg',v.bg);r.style.setProperty('--surface',v.surface);
+  r.style.setProperty('--surface2',v.surface2);r.style.setProperty('--border',v.border);
+  r.style.setProperty('--accent',v.accent);r.style.setProperty('--text',v.text_color);
+  r.style.setProperty('--muted',v.muted);
+  toast('Previewing custom theme live — save it to keep it!');
+}
+
+async function saveCustomTheme(){
+  const v=getBuilderValues();
+  if(!v.name.trim()){toast('Give your theme a name first','error');return;}
+  const{error}=await sb.from('custom_themes').insert(v);
+  if(error){toast('Error saving theme','error');return;}
+  toast(`Theme "${v.name}" saved!`);
+  await buildAppearanceUI();
+}
+
+async function deleteCustomTheme(id){
+  if(!confirm('Delete this custom theme?'))return;
+  await sb.from('custom_themes').delete().eq('id',id);
+  if(currentTheme==='custom_'+id){currentTheme='discord';applyTheme('discord',currentFont);}
+  await buildAppearanceUI();
+  toast('Theme deleted');
+}
+
+function resetCustomBuilder(){
+  document.getElementById('ct-name').value='';
+  const defaults={bg:'#0f1117',surface:'#16191f',surface2:'#1d2129',border:'#2a2d35',accent:'#5865F2',text:'#e3e5e8',muted:'#8e9297'};
+  Object.entries(defaults).forEach(([k,v])=>{
+    const colorEl=document.getElementById('ct-'+k);
+    const hexEl=document.getElementById('ct-'+k+'-hex');
+    if(colorEl)colorEl.value=v;
+    if(hexEl)hexEl.value=v;
+  });
+  updatePreview();
+}
+
 
 // ── AUTH ──────────────────────────────────────────────
 async function adminLogin(){
@@ -515,7 +650,9 @@ async function loadSettings(){
   if(s.description)document.getElementById('set-desc').value=s.description;
   if(s.theme)currentTheme=s.theme;
   if(s.font)currentFont=s.font;
-  applyTheme(currentTheme,currentFont);
+  const{data:ct}=await sb.from('custom_themes').select('*');
+  customThemesCache=ct||[];
+  applyTheme(currentTheme,currentFont,customThemesCache);
 }
 async function saveSettings(){
   const name=document.getElementById('set-name').value.trim();

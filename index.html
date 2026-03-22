@@ -188,6 +188,7 @@ textarea.form-input{resize:vertical;min-height:70px;line-height:1.5}
     <div class="nav-right">
       <span class="online-dot"></span>
       <span style="font-size:.775rem;color:var(--muted)">Online</span>
+      <button class="logout-btn" onclick="openPreferences()" style="margin-right:.25rem"><span class="ms">tune</span></button>
       <button class="logout-btn" onclick="logout()"><span class="ms">logout</span>Log out</button>
     </div>
   </nav>
@@ -296,6 +297,30 @@ textarea.form-input{resize:vertical;min-height:70px;line-height:1.5}
   </div>
 </div>
 
+<!-- PREFERENCES MODAL -->
+<div class="modal-overlay hidden" id="prefsModal">
+  <div class="modal" style="max-width:440px">
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div style="font-weight:600;font-size:.95rem;display:flex;align-items:center;gap:.4rem"><span class="ms">tune</span>Personal preferences</div>
+      <button onclick="closeModal('prefsModal')" style="background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center"><span class="ms">close</span></button>
+    </div>
+    <div style="padding:1.25rem 1.5rem">
+      <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem">Colour theme</div>
+      <div id="prefsThemeGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:.5rem;margin-bottom:1.25rem"></div>
+      <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem">Font</div>
+      <div id="prefsFontGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.5rem;margin-bottom:1.5rem"></div>
+      <div style="background:var(--surface2);border:1px solid var(--border);padding:.6rem .875rem;font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:.4rem;margin-bottom:1.25rem">
+        <span class="ms" style="font-size:14px">info</span>
+        Your preference is saved on this device only. Others see the site default.
+      </div>
+      <div style="display:flex;gap:.6rem;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="resetPreferences()"><span class="ms">refresh</span>Reset to default</button>
+        <button class="btn btn-primary" onclick="savePreferences()"><span class="ms">save</span>Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"><span class="ms" id="toastIcon">check_circle</span><span id="toastMsg"></span></div>
 
 <script>
@@ -305,17 +330,116 @@ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 const FONTS={'jetbrains':"'JetBrains Mono',monospace",'noto':"'Noto Sans',sans-serif",'ubuntu':"'Ubuntu',sans-serif",'datatype':"'JetBrains Mono',monospace"};
 const THEMES={
-  discord:{bg:'#0f1117',surface:'#16191f',surface2:'#1d2129',border:'#2a2d35',accent:'#5865F2',text:'#e3e5e8',muted:'#8e9297'},
-  midnight:{bg:'#0a0a0f',surface:'#111118',surface2:'#18181f',border:'#252530',accent:'#7c5cfc',text:'#e8e8f0',muted:'#888899'},
-  forest:{bg:'#0d1210',surface:'#141c18',surface2:'#1c2820',border:'#253028',accent:'#3ba55d',text:'#d8ede0',muted:'#7a9e82'},
-  crimson:{bg:'#130c0c',surface:'#1c1010',surface2:'#261616',border:'#3a2020',accent:'#ed4245',text:'#f0dede',muted:'#a07878'},
-  ocean:{bg:'#091218',surface:'#0e1c26',surface2:'#142433',border:'#1e3040',accent:'#0099cc',text:'#d0eaf5',muted:'#6899aa'},
+  discord:{label:'Discord',bg:'#0f1117',surface:'#16191f',surface2:'#1d2129',border:'#2a2d35',accent:'#5865F2',text:'#e3e5e8',muted:'#8e9297'},
+  midnight:{label:'Midnight',bg:'#0a0a0f',surface:'#111118',surface2:'#18181f',border:'#252530',accent:'#7c5cfc',text:'#e8e8f0',muted:'#888899'},
+  forest:{label:'Forest',bg:'#0d1210',surface:'#141c18',surface2:'#1c2820',border:'#253028',accent:'#3ba55d',text:'#d8ede0',muted:'#7a9e82'},
+  crimson:{label:'Crimson',bg:'#130c0c',surface:'#1c1010',surface2:'#261616',border:'#3a2020',accent:'#ed4245',text:'#f0dede',muted:'#a07878'},
+  ocean:{label:'Ocean',bg:'#091218',surface:'#0e1c26',surface2:'#142433',border:'#1e3040',accent:'#0099cc',text:'#d0eaf5',muted:'#6899aa'},
 };
-function applyTheme(s){
-  const r=document.documentElement,t=THEMES[s.theme||'discord']||THEMES.discord;
-  Object.entries(t).forEach(([k,v])=>r.style.setProperty('--'+k,v));
-  r.style.setProperty('--font',FONTS[s.font||'jetbrains']||FONTS.jetbrains);
+
+let customThemesCache=[];
+let personalTheme=null,personalFont=null;
+
+function buildAllThemes(){
+  const all={...THEMES};
+  customThemesCache.forEach(t=>all['custom_'+t.id]={label:t.name,bg:t.bg,surface:t.surface,surface2:t.surface2,border:t.border,accent:t.accent,text:t.text_color,muted:t.muted});
+  return all;
 }
+
+function applyTheme(s,customThemes){
+  if(customThemes)customThemesCache=customThemes;
+  // Personal preference overrides site default
+  const themeKey=personalTheme||(s&&s.theme)||'discord';
+  const fontKey=personalFont||(s&&s.font)||'jetbrains';
+  const all=buildAllThemes();
+  const t=all[themeKey]||THEMES.discord;
+  const r=document.documentElement;
+  Object.entries(t).forEach(([k,v])=>{if(k!=='label')r.style.setProperty('--'+k,v);});
+  r.style.setProperty('--font',FONTS[fontKey]||FONTS.jetbrains);
+}
+
+// Load personal prefs from localStorage on startup
+(function loadPersonalPrefs(){
+  try{
+    const p=JSON.parse(localStorage.getItem('site_prefs')||'{}');
+    if(p.theme)personalTheme=p.theme;
+    if(p.font)personalFont=p.font;
+  }catch(e){}
+})();
+
+// ── PREFERENCES UI ────────────────────────────────────
+let prefsSelectedTheme=null,prefsSelectedFont=null;
+
+async function openPreferences(){
+  prefsSelectedTheme=personalTheme||siteTheme||'discord';
+  prefsSelectedFont=personalFont||siteFont||'jetbrains';
+  // Load custom themes if not already loaded
+  if(!customThemesCache.length){
+    const{data}=await sb.from('custom_themes').select('*');
+    customThemesCache=data||[];
+  }
+  buildPrefsUI();
+  document.getElementById('prefsModal').classList.remove('hidden');
+}
+
+function buildPrefsUI(){
+  const all=buildAllThemes();
+  const tg=document.getElementById('prefsThemeGrid');
+  tg.innerHTML=Object.entries(all).map(([id,t])=>`
+    <div onclick="prefsSelectTheme('${id}')" id="pts-${id}" style="padding:.6rem;border:2px solid ${id===prefsSelectedTheme?'var(--accent)':'var(--border)'};cursor:pointer;text-align:center;background:var(--surface2);transition:border .15s">
+      <div style="display:flex;gap:2px;height:22px;margin-bottom:.4rem">
+        <span style="flex:1;background:${t.bg}"></span>
+        <span style="flex:1;background:${t.surface}"></span>
+        <span style="flex:1;background:${t.accent}"></span>
+      </div>
+      <div style="font-size:.68rem;color:var(--muted)">${t.label}</div>
+    </div>`).join('');
+  const fg=document.getElementById('prefsFontGrid');
+  fg.innerHTML=Object.entries(FONTS).map(([id,css])=>{
+    const labels={jetbrains:'JetBrains Mono',noto:'Noto Sans',ubuntu:'Ubuntu',datatype:'Datatype'};
+    const samples={jetbrains:'const x = 42',noto:'Clean & modern',ubuntu:'Friendly & open',datatype:'// code font'};
+    return`<div onclick="prefsSelectFont('${id}')" id="pfo-${id}" style="padding:.6rem;border:2px solid ${id===prefsSelectedFont?'var(--accent)':'var(--border)'};cursor:pointer;background:var(--surface2);font-family:${css};transition:border .15s">
+      <div style="font-size:.78rem;font-weight:600;margin-bottom:.15rem">${labels[id]}</div>
+      <div style="font-size:.68rem;color:var(--muted)">${samples[id]}</div>
+    </div>`;
+  }).join('');
+}
+
+function prefsSelectTheme(id){
+  prefsSelectedTheme=id;
+  document.querySelectorAll('[id^="pts-"]').forEach(el=>el.style.borderColor='var(--border)');
+  const el=document.getElementById('pts-'+id);if(el)el.style.borderColor='var(--accent)';
+  // Live preview
+  const all=buildAllThemes();
+  const t=all[id]||THEMES.discord;
+  const r=document.documentElement;
+  Object.entries(t).forEach(([k,v])=>{if(k!=='label')r.style.setProperty('--'+k,v);});
+}
+
+function prefsSelectFont(id){
+  prefsSelectedFont=id;
+  document.querySelectorAll('[id^="pfo-"]').forEach(el=>el.style.borderColor='var(--border)');
+  const el=document.getElementById('pfo-'+id);if(el)el.style.borderColor='var(--accent)';
+  document.documentElement.style.setProperty('--font',FONTS[id]||FONTS.jetbrains);
+}
+
+function savePreferences(){
+  personalTheme=prefsSelectedTheme;
+  personalFont=prefsSelectedFont;
+  try{localStorage.setItem('site_prefs',JSON.stringify({theme:personalTheme,font:personalFont}));}catch(e){}
+  closeModal('prefsModal');
+  toast('Preferences saved!');
+}
+
+function resetPreferences(){
+  personalTheme=null;personalFont=null;
+  try{localStorage.removeItem('site_prefs');}catch(e){}
+  applyTheme({theme:siteTheme,font:siteFont});
+  closeModal('prefsModal');
+  toast('Reset to site default');
+}
+
+let siteTheme='discord',siteFont='jetbrains';
 
 let allMembers=[],inviteLink='discord.gg/yourcode',claimingMemberId=null;
 
@@ -326,7 +450,11 @@ async function loadSettings(){
   if(s.server_name){document.getElementById('nav-server-name').textContent=s.server_name;document.getElementById('home-server-name').textContent=s.server_name;document.title=s.server_name;}
   if(s.description)document.getElementById('home-desc').textContent=s.description;
   if(s.invite_link){inviteLink=s.invite_link;document.getElementById('invite-link-display').textContent=s.invite_link;}
-  applyTheme(s);return s;
+  siteTheme=s.theme||'discord';
+  siteFont=s.font||'jetbrains';
+  const{data:ct}=await sb.from('custom_themes').select('*');
+  applyTheme(s,ct||[]);
+  return s;
 }
 async function checkPassword(pw){const{data}=await sb.from('settings').select('value').eq('key','password').single();return data&&data.value===pw;}
 async function loadMembers(){
