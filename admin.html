@@ -189,6 +189,7 @@ tr:hover td{background:var(--surface2)}
     <div class="nav-item" onclick="nav('members',this)"><span class="ms">group</span>Members<span class="nav-badge" id="memberBadge">0</span></div>
     <div class="nav-item" onclick="nav('announcements',this)"><span class="ms">campaign</span>Announcements</div>
     <div class="nav-item" onclick="nav('rules',this)"><span class="ms">gavel</span>Rules</div>
+    <div class="nav-item" onclick="nav('bounties',this)"><span class="ms">emoji_events</span>Bounties<span class="nav-badge" id="bountiesBadge" style="display:none">0</span></div>
     <div class="nav-section">Config</div>
     <div class="nav-item" onclick="nav('roles',this)"><span class="ms">badge</span>Role mappings</div>
     <div class="nav-item" onclick="nav('appearance',this)"><span class="ms">palette</span>Appearance</div>
@@ -255,6 +256,15 @@ tr:hover td{background:var(--surface2)}
         <div class="card-header"><span class="card-title"><span class="ms">format_list_numbered</span>Server rules</span><button class="btn btn-primary btn-sm" onclick="openAddRule()"><span class="ms">add</span>Add rule</button></div>
         <div id="ruleList"><div class="loading"><div class="spinner"></div>Loading...</div></div>
       </div>
+    </div>
+
+    <!-- BOUNTIES -->
+    <div class="panel" id="panel-bounties">
+      <div class="page-header"><h1><span class="ms">emoji_events</span>Bounties</h1><p>Tasks members can pick up and complete. Add a reward description to incentivise them.</p></div>
+      <div style="display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="openAddBounty()"><span class="ms">add</span>Add bounty</button>
+      </div>
+      <div id="bountiesList"><div class="loading"><div class="spinner"></div>Loading...</div></div>
     </div>
 
     <!-- ROLES -->
@@ -354,10 +364,18 @@ tr:hover td{background:var(--surface2)}
         <button class="btn btn-primary" onclick="saveSettings()"><span class="ms">save</span>Save changes</button>
       </div>
       <div class="card">
-        <div class="card-header"><span class="card-title"><span class="ms">lock</span>Security</span></div>
+        <div class="card-header"><span class="card-title"><span class="ms">lock</span>Site password</span></div>
+        <p style="font-size:.775rem;color:var(--muted);margin-bottom:.875rem">Password members use to access the public site.</p>
         <div class="form-group"><label>New site password</label><input class="form-control" id="set-pw" type="password" placeholder="Enter new password" /></div>
-        <div class="form-group"><label>Confirm new password</label><input class="form-control" id="set-pw2" type="password" placeholder="Confirm new password" /></div>
-        <button class="btn btn-ghost" onclick="changePw()"><span class="ms">key</span>Update password</button>
+        <div class="form-group"><label>Confirm</label><input class="form-control" id="set-pw2" type="password" placeholder="Confirm new password" /></div>
+        <button class="btn btn-ghost" onclick="changePw('password','set-pw','set-pw2')"><span class="ms">key</span>Update site password</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title"><span class="ms">admin_panel_settings</span>Admin password</span></div>
+        <p style="font-size:.775rem;color:var(--muted);margin-bottom:.875rem">Password for this admin dashboard only. Keep this separate and private.</p>
+        <div class="form-group"><label>New admin password</label><input class="form-control" id="set-apw" type="password" placeholder="Enter new admin password" /></div>
+        <div class="form-group"><label>Confirm</label><input class="form-control" id="set-apw2" type="password" placeholder="Confirm new admin password" /></div>
+        <button class="btn btn-ghost" onclick="changePw('admin_password','set-apw','set-apw2')"><span class="ms">key</span>Update admin password</button>
       </div>
     </div>
 
@@ -444,6 +462,37 @@ tr:hover td{background:var(--surface2)}
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('roleMapModal')">Cancel</button>
       <button class="btn btn-primary" id="saveRoleMapBtn" onclick="saveRoleMap()"><span class="ms">save</span>Save mapping</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOUNTY MODAL -->
+<div class="modal-overlay hidden" id="bountyModal">
+  <div class="modal">
+    <div class="modal-header"><h3><span class="ms">emoji_events</span><span id="bountyModalTitle">Add bounty</span></h3><button class="modal-close" onclick="closeModal('bountyModal')"><span class="ms">close</span></button></div>
+    <div class="form-group"><label>Title</label><input class="form-control" id="b-title" placeholder="e.g. Design a new server banner" /></div>
+    <div class="form-group"><label>Description</label><textarea class="form-control" id="b-desc" placeholder="What needs to be done? Be specific about requirements..."></textarea></div>
+    <div class="form-group"><label>Reward</label><input class="form-control" id="b-reward" placeholder="e.g. Custom role, shoutout, bragging rights..." /></div>
+    <div class="form-row">
+      <div class="form-group"><label>Difficulty</label>
+        <select class="form-control" id="b-difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Status</label>
+        <select class="form-control" id="b-status">
+          <option value="open">Open</option>
+          <option value="claimed">Claimed</option>
+          <option value="completed">Completed</option>
+          <option value="closed">Closed</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('bountyModal')">Cancel</button>
+      <button class="btn btn-primary" id="saveBountyBtn" onclick="saveBounty()"><span class="ms">save</span>Save bounty</button>
     </div>
   </div>
 </div>
@@ -622,7 +671,7 @@ async function adminLogin(){
   const btn=document.getElementById('adminLoginBtn'),err=document.getElementById('adminErr'),pw=document.getElementById('adminPw').value;
   if(!pw)return;
   btn.disabled=true;btn.innerHTML='<span class="ms">sync</span>Checking...';err.style.display='none';
-  const{data}=await sb.from('settings').select('value').eq('key','password').single();
+  const{data}=await sb.from('settings').select('value').eq('key','admin_password').single();
   if(data&&data.value===pw){
     sessionStorage.setItem('admin_auth','1');
     document.getElementById('adminLogin').classList.add('hidden');
@@ -637,7 +686,7 @@ if(sessionStorage.getItem('admin_auth')==='1'){document.getElementById('adminLog
 
 // ── LOAD ALL ──────────────────────────────────────────
 async function loadAll(){
-  await Promise.all([loadSettings(),loadMembers(),loadAnns(),loadRules(),loadClaims()]);
+  await Promise.all([loadSettings(),loadMembers(),loadAnns(),loadRules(),loadClaims(),loadBounties()]);
 }
 
 // ── SETTINGS ─────────────────────────────────────────
@@ -664,13 +713,15 @@ async function saveSettings(){
   if(name)document.getElementById('sidebar-name').textContent=name;
   toast('Settings saved!');
 }
-async function changePw(){
-  const pw=document.getElementById('set-pw').value,pw2=document.getElementById('set-pw2').value;
+async function changePw(settingKey, pwId, pw2Id){
+  const pw=document.getElementById(pwId).value;
+  const pw2=document.getElementById(pw2Id).value;
   if(!pw){toast('Enter a new password','error');return;}
   if(pw!==pw2){toast('Passwords do not match','error');return;}
-  await sb.from('settings').upsert({key:'password',value:pw},{onConflict:'key'});
-  document.getElementById('set-pw').value='';document.getElementById('set-pw2').value='';
-  toast('Password updated!');
+  await sb.from('settings').upsert({key:settingKey,value:pw},{onConflict:'key'});
+  document.getElementById(pwId).value='';document.getElementById(pw2Id).value='';
+  const label=settingKey==='admin_password'?'Admin':'Site';
+  toast(`${label} password updated!`);
 }
 
 // ── MEMBERS ──────────────────────────────────────────
@@ -817,6 +868,8 @@ async function deleteRoleMap(id){if(!confirm('Delete this mapping?'))return;awai
 async function triggerResync(){await sb.from('settings').upsert({key:'resync_requested',value:'1'},{onConflict:'key'});toast('Re-sync requested! Type #Msync in Discord to apply now.');}
 
 // ── CLAIM REQUESTS ────────────────────────────────────
+const claimCache={};
+
 async function loadClaims(){
   const{data}=await sb.from('claim_requests').select('*,members(name,role,color)').eq('status','pending').order('requested_at');
   const badge=document.getElementById('claimsBadge');
@@ -830,6 +883,8 @@ async function loadClaims(){
     return;
   }
   badge.textContent=data.length;badge.style.display='';
+  // Store full claim objects in JS — never pass complex data through onclick attributes
+  data.forEach(c=>claimCache[c.id]=c);
   list.innerHTML=data.map(c=>{
     const m=c.members||{};
     const color=m.color||'#5865F2';
@@ -853,7 +908,7 @@ async function loadClaims(){
           ${c.bio?`<div style="font-size:.8rem;color:var(--muted);line-height:1.55;margin-bottom:.6rem;padding:.6rem;background:var(--surface2);border:1px solid var(--border)">${c.bio}</div>`:''}
           ${links.length?`<div style="display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:.75rem">${links.join('')}</div>`:''}
           <div style="display:flex;gap:.5rem;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border)">
-            <button class="btn btn-primary" onclick="approveClaim(${c.id},${c.member_id},'${c.bio||''}','${c.custom_status||''}','${c.github||''}','${c.steam||''}','${c.instagram||''}','${c.spotify||''}')"><span class="ms">check</span>Approve</button>
+            <button class="btn btn-primary" onclick="approveClaim(${c.id})"><span class="ms">check</span>Approve</button>
             <button class="btn btn-danger" onclick="denyClaim(${c.id})"><span class="ms">close</span>Deny</button>
           </div>
         </div>
@@ -862,19 +917,20 @@ async function loadClaims(){
   }).join('');
 }
 
-async function approveClaim(claimId,memberId,bio,status,github,steam,instagram,spotify){
-  // Update the member record with all the claimed info
+async function approveClaim(claimId){
+  const c=claimCache[claimId];
+  if(!c){toast('Claim not found — try refreshing','error');return;}
   await sb.from('members').update({
-    bio:bio||null,
-    custom_status:status||null,
-    github:github||null,
-    steam:steam||null,
-    instagram:instagram||null,
-    spotify:spotify||null,
+    bio:c.bio||null,
+    custom_status:c.custom_status||null,
+    github:c.github||null,
+    steam:c.steam||null,
+    instagram:c.instagram||null,
+    spotify:c.spotify||null,
     claimed:true,
-  }).eq('id',memberId);
-  // Mark claim as approved
+  }).eq('id',c.member_id);
   await sb.from('claim_requests').update({status:'approved'}).eq('id',claimId);
+  delete claimCache[claimId];
   toast('Profile claim approved!');
   await loadClaims();
   await loadMembers();
@@ -883,8 +939,100 @@ async function approveClaim(claimId,memberId,bio,status,github,steam,instagram,s
 async function denyClaim(claimId){
   if(!confirm('Deny this claim request?'))return;
   await sb.from('claim_requests').update({status:'denied'}).eq('id',claimId);
+  delete claimCache[claimId];
   toast('Claim request denied.');
   await loadClaims();
+}
+
+// ── BOUNTIES ──────────────────────────────────────────
+let editingBounty=null;
+
+const difficultyColors={easy:'var(--green)',medium:'var(--yellow)',hard:'var(--red)'};
+const statusColors={open:'var(--accent)',claimed:'var(--yellow)',completed:'var(--green)',closed:'var(--muted)'};
+
+async function loadBounties(){
+  const{data}=await sb.from('bounties').select('*').order('created_at',{ascending:false});
+  const list=document.getElementById('bountiesList');
+  const badge=document.getElementById('bountiesBadge');
+  const open=data?data.filter(b=>b.status==='open').length:0;
+  badge.textContent=open;badge.style.display=open?'':'none';
+  if(!data||!data.length){
+    list.innerHTML=`<div class="card" style="text-align:center;padding:2.5rem;color:var(--muted)">
+      <span class="ms" style="font-size:36px;display:block;margin-bottom:.75rem;color:var(--border)">emoji_events</span>
+      No bounties yet. Add one to get started!
+    </div>`;
+    return;
+  }
+  list.innerHTML=data.map(b=>`
+    <div class="card" style="margin-bottom:.875rem">
+      <div style="display:flex;align-items:flex-start;gap:.875rem">
+        <div style="width:36px;height:36px;background:${difficultyColors[b.difficulty]||'var(--accent)'}18;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid ${difficultyColors[b.difficulty]||'var(--accent)'}40">
+          <span class="ms" style="font-size:18px;color:${difficultyColors[b.difficulty]||'var(--accent)'}">emoji_events</span>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.35rem">
+            <span style="font-weight:600;font-size:.9rem">${b.title}</span>
+            <span style="font-size:.68rem;padding:.15rem .45rem;background:${statusColors[b.status]||'var(--accent)'}18;color:${statusColors[b.status]||'var(--accent)'};font-weight:600">${b.status}</span>
+            <span style="font-size:.68rem;padding:.15rem .45rem;background:${difficultyColors[b.difficulty]||'var(--accent)'}18;color:${difficultyColors[b.difficulty]||'var(--accent)'};font-weight:600">${b.difficulty}</span>
+            ${b.reward?`<span style="font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:.25rem;margin-left:auto"><span class="ms" style="font-size:14px">redeem</span>${b.reward}</span>`:''}
+          </div>
+          ${b.description?`<div style="font-size:.8rem;color:var(--muted);line-height:1.55">${b.description}</div>`:''}
+          <div style="display:flex;gap:.4rem;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);flex-wrap:wrap">
+            ${b.status!=='completed'&&b.status!=='closed'?`<button class="btn btn-ghost btn-sm" onclick="markBounty(${b.id},'completed')"><span class="ms">check_circle</span>Complete</button>`:''}
+            ${b.status==='open'?`<button class="btn btn-ghost btn-sm" onclick="markBounty(${b.id},'closed')"><span class="ms">cancel</span>Close</button>`:''}
+            ${b.status==='closed'||b.status==='completed'?`<button class="btn btn-ghost btn-sm" onclick="markBounty(${b.id},'open')"><span class="ms">refresh</span>Reopen</button>`:''}
+            <button class="btn btn-ghost btn-sm" onclick="openEditBounty(${b.id},'${encodeURIComponent(b.title)}','${encodeURIComponent(b.description||'')}','${encodeURIComponent(b.reward||'')}','${b.difficulty}','${b.status}')"><span class="ms">edit</span></button>
+            <button class="btn btn-danger btn-sm" onclick="deleteBounty(${b.id})"><span class="ms">delete</span></button>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openAddBounty(){
+  editingBounty=null;
+  document.getElementById('bountyModalTitle').textContent='Add bounty';
+  document.getElementById('b-title').value='';
+  document.getElementById('b-desc').value='';
+  document.getElementById('b-reward').value='';
+  document.getElementById('b-difficulty').value='easy';
+  document.getElementById('b-status').value='open';
+  document.getElementById('bountyModal').classList.remove('hidden');
+}
+function openEditBounty(id,title,desc,reward,difficulty,status){
+  editingBounty=id;
+  document.getElementById('bountyModalTitle').textContent='Edit bounty';
+  document.getElementById('b-title').value=decodeURIComponent(title);
+  document.getElementById('b-desc').value=decodeURIComponent(desc);
+  document.getElementById('b-reward').value=decodeURIComponent(reward);
+  document.getElementById('b-difficulty').value=difficulty;
+  document.getElementById('b-status').value=status;
+  document.getElementById('bountyModal').classList.remove('hidden');
+}
+async function saveBounty(){
+  const title=document.getElementById('b-title').value.trim();if(!title)return;
+  const btn=document.getElementById('saveBountyBtn');btn.disabled=true;btn.innerHTML='<span class="ms">sync</span>Saving...';
+  const obj={
+    title,
+    description:document.getElementById('b-desc').value||null,
+    reward:document.getElementById('b-reward').value||null,
+    difficulty:document.getElementById('b-difficulty').value,
+    status:document.getElementById('b-status').value,
+  };
+  if(editingBounty){await sb.from('bounties').update(obj).eq('id',editingBounty);}
+  else{await sb.from('bounties').insert(obj);}
+  btn.disabled=false;btn.innerHTML='<span class="ms">save</span>Save bounty';
+  closeModal('bountyModal');await loadBounties();toast('Bounty saved!');
+}
+async function markBounty(id,status){
+  await sb.from('bounties').update({status}).eq('id',id);
+  await loadBounties();
+  toast(`Bounty marked as ${status}`);
+}
+async function deleteBounty(id){
+  if(!confirm('Delete this bounty?'))return;
+  await sb.from('bounties').delete().eq('id',id);
+  await loadBounties();toast('Bounty deleted');
 }
 
 // ── UTILS ─────────────────────────────────────────────
@@ -896,6 +1044,7 @@ function nav(id,el){
   if(id==='roles')loadRoleMappings();
   if(id==='appearance')buildAppearanceUI();
   if(id==='claims')loadClaims();
+  if(id==='bounties')loadBounties();
 }
 function closeModal(id){document.getElementById(id).classList.add('hidden');}
 document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.add('hidden');}));

@@ -184,6 +184,7 @@ textarea.form-input{resize:vertical;min-height:70px;line-height:1.5}
       <div class="nav-link" onclick="showPage('announcements',this)"><span class="ms">campaign</span>Announcements</div>
       <div class="nav-link" onclick="showPage('members',this)"><span class="ms">group</span>Members</div>
       <div class="nav-link" onclick="showPage('rules',this)"><span class="ms">gavel</span>Rules</div>
+      <div class="nav-link" onclick="showPage('bounties',this)"><span class="ms">emoji_events</span>Bounties</div>
     </div>
     <div class="nav-right">
       <span class="online-dot"></span>
@@ -238,6 +239,11 @@ textarea.form-input{resize:vertical;min-height:70px;line-height:1.5}
     <div class="page" id="page-rules">
       <div class="section-header"><h2><span class="ms">gavel</span>Rules</h2></div>
       <div id="rulesContainer"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+    </div>
+
+    <div class="page" id="page-bounties">
+      <div class="section-header"><h2><span class="ms">emoji_events</span>Bounties</h2></div>
+      <div id="bountiesContainer"><div class="loading"><div class="spinner"></div>Loading...</div></div>
     </div>
 
   </div>
@@ -494,6 +500,22 @@ async function loadRules(){
     </div>`).join('');
 }
 
+async function loadBounties(){
+  const{data}=await sb.from('bounties').select('*').eq('status','open').order('created_at',{ascending:false});
+  const c=document.getElementById('bountiesContainer');
+  if(!data||!data.length){c.innerHTML='<div class="loading">No open bounties right now. Check back later!</div>';return;}
+  const diffColors={easy:'var(--green)',medium:'var(--yellow)',hard:'var(--red)'};
+  c.innerHTML=data.map(b=>`
+    <div style="background:var(--surface);border:1px solid var(--border);padding:1.25rem;margin-bottom:.875rem;border-left:3px solid ${diffColors[b.difficulty]||'var(--accent)'}">
+      <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.5rem">
+        <span style="font-weight:600;font-size:.9rem">${b.title}</span>
+        <span style="font-size:.68rem;padding:.15rem .45rem;background:${diffColors[b.difficulty]||'var(--accent)'}18;color:${diffColors[b.difficulty]||'var(--accent)'};font-weight:600">${b.difficulty}</span>
+        ${b.reward?`<span style="font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:.25rem;margin-left:auto"><span class="ms" style="font-size:14px">redeem</span>${b.reward}</span>`:''}
+      </div>
+      ${b.description?`<div style="font-size:.838rem;color:var(--muted);line-height:1.6">${b.description}</div>`:''}
+    </div>`).join('');
+}
+
 function initials(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase();}
 
 function socialLinks(m){
@@ -638,7 +660,7 @@ async function login(){
     document.getElementById('loginScreen').style.display='none';
     const app=document.getElementById('mainApp');app.classList.remove('hidden');app.style.display='flex';
     await loadSettings();
-    await Promise.all([loadMembers(),loadAnnouncements(),loadRules()]);
+    await Promise.all([loadMembers(),loadAnnouncements(),loadRules(),loadBounties()]);
   }else{err.classList.remove('hidden');btn.disabled=false;btn.innerHTML='<span class="ms">login</span>Enter Server';}
 }
 document.getElementById('loginBtn').onclick=login;
@@ -646,7 +668,7 @@ document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='En
 if(sessionStorage.getItem('server_auth')==='1'){
   document.getElementById('loginScreen').style.display='none';
   const app=document.getElementById('mainApp');app.classList.remove('hidden');app.style.display='flex';
-  loadSettings().then(()=>Promise.all([loadMembers(),loadAnnouncements(),loadRules()]));
+  loadSettings().then(()=>Promise.all([loadMembers(),loadAnnouncements(),loadRules(),loadBounties()]));
 }
 </script>
 </body>
