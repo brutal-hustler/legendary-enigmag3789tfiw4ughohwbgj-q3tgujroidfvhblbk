@@ -1,45 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>School Server</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans:wght@400;500;600&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0f1117;--surface:#16191f;--surface2:#1d2129;--border:#2a2d35;
-  --accent:#5865F2;--accent2:#7289da;--text:#e3e5e8;--muted:#8e9297;
-  --green:#3ba55d;--red:#ed4245;--yellow:#faa61a;
-}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+*{box-sizing:border-box;margin:0;padding:0;border-radius:0!important}
+:root{--bg:#0f1117;--surface:#16191f;--surface2:#1d2129;--border:#2a2d35;--accent:#5865F2;--accent2:#7289da;--text:#e3e5e8;--muted:#8e9297;--green:#3ba55d;--red:#ed4245;--yellow:#faa61a;--font:'JetBrains Mono',monospace;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
 .hidden{display:none!important}
+.ms{font-family:'Material Symbols Rounded';font-style:normal;font-size:18px;line-height:1;vertical-align:middle;user-select:none;flex-shrink:0}
 
 /* LOGIN */
-.login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
-.login-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2.5rem;width:100%;max-width:380px;text-align:center}
-.login-logo{width:64px;height:64px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:28px}
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+.login-card{background:var(--surface);border:1px solid var(--border);padding:2.5rem;width:100%;max-width:380px;text-align:center}
+.login-logo{width:64px;height:64px;background:var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem}
+.login-logo .ms{font-size:32px;color:#fff}
 .login-card h2{font-size:1.3rem;font-weight:600;margin-bottom:.4rem}
 .login-card p{color:var(--muted);font-size:.875rem;margin-bottom:1.75rem}
-.login-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.7rem 1rem;color:var(--text);font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;margin-bottom:.5rem}
+.login-input{width:100%;background:var(--surface2);border:1px solid var(--border);padding:.7rem 1rem;color:var(--text);font-size:.875rem;font-family:var(--font);outline:none;transition:border .2s;margin-bottom:.5rem}
 .login-input:focus{border-color:var(--accent)}
-.login-btn{width:100%;background:var(--accent);border:none;border-radius:8px;padding:.75rem;color:#fff;font-size:.95rem;font-weight:600;cursor:pointer;margin-top:.375rem;transition:opacity .2s;font-family:'DM Sans',sans-serif}
+.login-btn{width:100%;background:var(--accent);border:none;padding:.75rem;color:#fff;font-size:.875rem;font-weight:600;cursor:pointer;margin-top:.375rem;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:.4rem}
 .login-btn:hover{opacity:.9}
 .login-btn:disabled{opacity:.5;cursor:not-allowed}
 .login-error{color:var(--red);font-size:.8rem;margin-top:.5rem}
 
 /* NAV */
-.navbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;gap:1.5rem;height:56px;position:sticky;top:0;z-index:10}
-.nav-logo{display:flex;align-items:center;gap:.6rem;font-weight:600;font-size:1rem;margin-right:.5rem}
-.nav-logo .dot{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
-.nav-links{display:flex;gap:.25rem;flex:1}
-.nav-link{padding:.4rem .75rem;border-radius:6px;font-size:.875rem;color:var(--muted);cursor:pointer;transition:all .15s;font-weight:500}
+.navbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;gap:1rem;height:56px;position:sticky;top:0;z-index:10}
+.nav-logo{display:flex;align-items:center;gap:.6rem;font-weight:600;font-size:.9rem;margin-right:.5rem;flex-shrink:0}
+.logo-box{width:30px;height:30px;background:var(--accent);display:flex;align-items:center;justify-content:center}
+.logo-box .ms{font-size:16px;color:#fff}
+.nav-links{display:flex;gap:.1rem;flex:1}
+.nav-link{padding:.4rem .65rem;font-size:.825rem;color:var(--muted);cursor:pointer;transition:all .15s;font-weight:500;display:flex;align-items:center;gap:.3rem;white-space:nowrap}
 .nav-link:hover,.nav-link.active{background:var(--surface2);color:var(--text)}
 .nav-link.active{color:var(--accent)}
-.nav-right{margin-left:auto;display:flex;align-items:center;gap:.75rem}
-.online-dot{width:8px;height:8px;background:var(--green);border-radius:50%;display:inline-block}
-.logout-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);padding:.35rem .75rem;font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:.6rem;flex-shrink:0}
+.online-dot{width:8px;height:8px;background:var(--green);border-radius:50%!important;flex-shrink:0}
+.logout-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:.3rem .65rem;font-size:.775rem;cursor:pointer;font-family:var(--font);transition:all .2s;display:flex;align-items:center;gap:.3rem}
 .logout-btn:hover{border-color:var(--red);color:var(--red)}
 
 /* CONTENT */
@@ -48,103 +48,155 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .page.active{display:block}
 
 /* HOME */
-.hero{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:2rem}
-.hero-icon{width:80px;height:80px;background:var(--accent);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0}
-.hero h1{font-size:1.75rem;font-weight:600;margin-bottom:.5rem}
-.hero p{color:var(--muted);font-size:.95rem;line-height:1.6}
+.hero{background:var(--surface);border:1px solid var(--border);padding:2.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:2rem}
+.hero-icon{width:72px;height:72px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hero-icon .ms{font-size:36px;color:#fff}
+.hero h1{font-size:1.6rem;font-weight:600;margin-bottom:.5rem}
+.hero p{color:var(--muted);font-size:.9rem;line-height:1.6}
 .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem}
-.stat-card .label{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);padding:1.25rem}
+.stat-card .label{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem}
 .stat-card .value{font-size:1.5rem;font-weight:600}
 .stat-card .value.green{color:var(--green)}
 .stat-card .value.accent{color:var(--accent)}
-.invite-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;display:flex;align-items:center;gap:1rem}
-.invite-link{font-family:'DM Mono',monospace;font-size:.875rem;background:var(--surface2);padding:.5rem .875rem;border-radius:6px;flex:1;color:var(--accent2);border:1px solid var(--border)}
-.copy-btn{background:var(--accent);border:none;border-radius:6px;color:#fff;padding:.5rem 1rem;cursor:pointer;font-size:.875rem;font-weight:500;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:opacity .2s}
+.invite-card{background:var(--surface);border:1px solid var(--border);padding:1.1rem 1.25rem;display:flex;align-items:center;gap:.875rem}
+.invite-link{font-size:.825rem;background:var(--surface2);padding:.45rem .75rem;flex:1;color:var(--accent2);border:1px solid var(--border);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.copy-btn{background:var(--accent);border:none;color:#fff;padding:.45rem .875rem;cursor:pointer;font-size:.8rem;font-family:var(--font);white-space:nowrap;display:flex;align-items:center;gap:.3rem}
 .copy-btn:hover{opacity:.85}
 
 /* SECTION HEADER */
 .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
-.section-header h2{font-size:1.1rem;font-weight:600}
-.badge{background:var(--accent);color:#fff;font-size:.7rem;padding:.2rem .5rem;border-radius:20px;font-weight:600}
+.section-header h2{font-size:1.05rem;font-weight:600;display:flex;align-items:center;gap:.5rem}
+.badge{background:var(--accent);color:#fff;font-size:.68rem;padding:.2rem .5rem;font-weight:600}
 
 /* ANNOUNCEMENTS */
-.announce-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:.875rem;border-left:3px solid var(--accent)}
+.announce-card{background:var(--surface);border:1px solid var(--border);padding:1.25rem;margin-bottom:.875rem;border-left:3px solid var(--accent)}
 .announce-card.pinned{border-left-color:var(--yellow)}
-.announce-card.pinned .tag{background:#faa61a20;color:var(--yellow)}
-.announce-header{display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem}
-.tag{font-size:.7rem;padding:.2rem .6rem;border-radius:20px;background:#5865f220;color:var(--accent);font-weight:600;letter-spacing:.03em}
-.announce-date{font-size:.75rem;color:var(--muted);margin-left:auto}
-.announce-title{font-weight:600;font-size:.95rem;margin-bottom:.35rem}
-.announce-body{color:var(--muted);font-size:.875rem;line-height:1.6}
+.announce-card.pinned .tag{background:#faa61a18;color:var(--yellow)}
+.announce-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem}
+.tag{font-size:.68rem;padding:.2rem .5rem;background:#5865f218;color:var(--accent);font-weight:600;display:flex;align-items:center;gap:.25rem}
+.tag .ms{font-size:13px}
+.announce-date{font-size:.72rem;color:var(--muted);margin-left:auto}
+.announce-title{font-weight:600;font-size:.9rem;margin-bottom:.35rem}
+.announce-body{color:var(--muted);font-size:.838rem;line-height:1.6}
 
-/* MEMBERS */
-.members-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.875rem}
-.member-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem;display:flex;align-items:center;gap:.875rem}
-.avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.9rem;flex-shrink:0}
-.member-info .name{font-weight:500;font-size:.9rem}
-.member-info .role-label{font-size:.75rem;margin-top:.15rem}
+/* MEMBERS GRID */
+.members-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.875rem}
+.member-card{background:var(--surface);border:1px solid var(--border);padding:1.1rem;cursor:pointer;transition:border .15s;position:relative}
+.member-card:hover{border-color:var(--accent)}
+.member-card-top{display:flex;align-items:center;gap:.75rem;margin-bottom:.6rem}
+.avatar{width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.9rem;flex-shrink:0}
+.member-info .name{font-weight:500;font-size:.875rem}
+.member-info .role-label{font-size:.72rem;margin-top:.1rem}
 .role-label.owner{color:#ffd700}
 .role-label.admin{color:var(--red)}
 .role-label.mod{color:var(--accent2)}
 .role-label.member{color:var(--muted)}
-.status-dot{width:10px;height:10px;border-radius:50%;margin-left:auto;flex-shrink:0}
+.status-dot{width:9px;height:9px;border-radius:50%!important;margin-left:auto;flex-shrink:0}
 .status-dot.online{background:var(--green)}
 .status-dot.idle{background:var(--yellow)}
 .status-dot.offline{background:#4f545c}
-.filter-row{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
-.filter-btn{background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--muted);padding:.35rem .75rem;font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.member-status-text{font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:.25rem;margin-bottom:.5rem}
+.member-links{display:flex;gap:.35rem;flex-wrap:wrap}
+.social-link{display:flex;align-items:center;gap:.2rem;font-size:.68rem;color:var(--muted);padding:.15rem .4rem;background:var(--surface2);border:1px solid var(--border);text-decoration:none;transition:color .15s}
+.social-link:hover{color:var(--accent);border-color:var(--accent)}
+.social-link .ms{font-size:13px}
+.claim-badge{position:absolute;top:.6rem;right:.6rem;background:var(--accent);color:#fff;font-size:.6rem;padding:.15rem .4rem;font-weight:600}
+.unclaimed-badge{position:absolute;top:.6rem;right:.6rem;background:var(--surface2);color:var(--muted);font-size:.6rem;padding:.15rem .4rem;font-weight:600;border:1px solid var(--border)}
+.filter-row{display:flex;gap:.4rem;margin-bottom:1rem;flex-wrap:wrap}
+.filter-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:.3rem .65rem;font-size:.775rem;cursor:pointer;font-family:var(--font);transition:all .15s}
 .filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
 
 /* RULES */
-.rule-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:.875rem;display:flex;gap:1rem;align-items:flex-start}
-.rule-num{width:32px;height:32px;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--accent);font-size:.875rem;flex-shrink:0;border:1px solid var(--border)}
-.rule-title{font-weight:600;font-size:.9rem;margin-bottom:.3rem}
-.rule-body{color:var(--muted);font-size:.85rem;line-height:1.6}
+.rule-card{background:var(--surface);border:1px solid var(--border);padding:1.25rem;margin-bottom:.875rem;display:flex;gap:1rem;align-items:flex-start}
+.rule-num{width:30px;height:30px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--accent);font-size:.825rem;flex-shrink:0;border:1px solid var(--border)}
+.rule-title{font-weight:600;font-size:.875rem;margin-bottom:.3rem}
+.rule-body{color:var(--muted);font-size:.825rem;line-height:1.6}
+
+/* PROFILE MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:100;padding:1rem}
+.modal{background:var(--surface);border:1px solid var(--border);padding:0;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+.modal-banner{height:72px;background:var(--accent);position:relative}
+.modal-avatar{width:64px;height:64px;background:var(--surface);border:3px solid var(--surface);position:absolute;bottom:-28px;left:1.5rem;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.2rem}
+.modal-close-btn{position:absolute;top:.6rem;right:.6rem;background:rgba(0,0,0,.3);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;padding:.25rem}
+.modal-close-btn .ms{font-size:20px}
+.modal-body{padding:2.5rem 1.5rem 1.5rem}
+.modal-name{font-size:1.2rem;font-weight:700;margin-bottom:.2rem;display:flex;align-items:center;gap:.6rem}
+.modal-role{font-size:.78rem;margin-bottom:.6rem}
+.modal-custom-status{font-size:.825rem;color:var(--muted);margin-bottom:.875rem;display:flex;align-items:center;gap:.4rem;min-height:1.2rem}
+.modal-bio{font-size:.838rem;color:var(--muted);line-height:1.65;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.modal-section-label{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;font-weight:500}
+.modal-socials{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.25rem}
+.modal-social-btn{display:flex;align-items:center;gap:.4rem;font-size:.8rem;padding:.4rem .75rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);text-decoration:none;font-family:var(--font);cursor:pointer;transition:all .15s}
+.modal-social-btn:hover{border-color:var(--accent);color:var(--accent)}
+.modal-social-btn .ms{font-size:16px}
+.modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.6rem;justify-content:flex-end}
+
+/* CLAIM FORM */
+.claim-form{padding:1.5rem;border-top:1px solid var(--border)}
+.claim-form h4{font-size:.875rem;font-weight:600;margin-bottom:.25rem;display:flex;align-items:center;gap:.4rem}
+.claim-form p{font-size:.775rem;color:var(--muted);margin-bottom:1rem}
+.form-group{margin-bottom:.875rem}
+.form-group label{display:block;font-size:.75rem;color:var(--muted);margin-bottom:.35rem;font-weight:500}
+.form-input{width:100%;background:var(--surface2);border:1px solid var(--border);padding:.5rem .75rem;color:var(--text);font-size:.825rem;font-family:var(--font);outline:none;transition:border .2s}
+.form-input:focus{border-color:var(--accent)}
+textarea.form-input{resize:vertical;min-height:70px;line-height:1.5}
+.btn{border:none;padding:.45rem .875rem;font-size:.8rem;font-weight:500;cursor:pointer;font-family:var(--font);transition:all .15s;display:inline-flex;align-items:center;gap:.35rem}
+.btn .ms{font-size:15px}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{opacity:.88}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--surface);border:1px solid var(--border);padding:.7rem 1rem;font-size:.825rem;color:var(--text);z-index:200;display:flex;align-items:center;gap:.5rem;opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast .ms{font-size:16px;color:var(--green)}
 
 /* LOADING */
-.loading{text-align:center;padding:3rem;color:var(--muted);font-size:.9rem}
-.spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 1rem}
+.loading{text-align:center;padding:3rem;color:var(--muted);font-size:.875rem}
+.spinner{width:22px;height:22px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%!important;animation:spin .7s linear infinite;margin:0 auto 1rem}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
-    <div class="login-logo">🎓</div>
+    <div class="login-logo"><span class="ms">school</span></div>
     <h2>Welcome Back</h2>
     <p>Enter the server password to access the site</p>
-    <input class="login-input" type="password" id="pwInput" placeholder="Password" />
+    <input class="login-input" type="password" id="pwInput" placeholder="Password"/>
     <div class="login-error hidden" id="loginErr">Incorrect password. Try again.</div>
-    <button class="login-btn" id="loginBtn">Enter Server</button>
+    <button class="login-btn" id="loginBtn"><span class="ms">login</span>Enter Server</button>
   </div>
 </div>
 
-<!-- MAIN APP -->
 <div id="mainApp" class="hidden" style="display:none;flex-direction:column;min-height:100vh">
   <nav class="navbar">
-    <div class="nav-logo"><div class="dot">🎓</div> <span id="nav-server-name">School Server</span></div>
+    <div class="nav-logo">
+      <div class="logo-box"><span class="ms">forum</span></div>
+      <span id="nav-server-name">School Server</span>
+    </div>
     <div class="nav-links">
-      <div class="nav-link active" onclick="showPage('home',this)">Home</div>
-      <div class="nav-link" onclick="showPage('announcements',this)">Announcements</div>
-      <div class="nav-link" onclick="showPage('members',this)">Members</div>
-      <div class="nav-link" onclick="showPage('rules',this)">Rules</div>
+      <div class="nav-link active" onclick="showPage('home',this)"><span class="ms">home</span>Home</div>
+      <div class="nav-link" onclick="showPage('announcements',this)"><span class="ms">campaign</span>Announcements</div>
+      <div class="nav-link" onclick="showPage('members',this)"><span class="ms">group</span>Members</div>
+      <div class="nav-link" onclick="showPage('rules',this)"><span class="ms">gavel</span>Rules</div>
     </div>
     <div class="nav-right">
       <span class="online-dot"></span>
-      <span style="font-size:.8rem;color:var(--muted)">Online</span>
-      <button class="logout-btn" onclick="logout()">Log out</button>
+      <span style="font-size:.775rem;color:var(--muted)">Online</span>
+      <button class="logout-btn" onclick="logout()"><span class="ms">logout</span>Log out</button>
     </div>
   </nav>
 
   <div class="content">
 
-    <!-- HOME -->
     <div class="page active" id="page-home">
       <div class="hero">
-        <div class="hero-icon">🎓</div>
+        <div class="hero-icon"><span class="ms">forum</span></div>
         <div>
           <h1 id="home-server-name">School Server</h1>
           <p id="home-desc">A private space for our class and friends.</p>
@@ -156,190 +208,317 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <div class="stat-card"><div class="label">Announcements</div><div class="value" id="stat-ann">—</div></div>
       </div>
       <div class="invite-card">
-        <span style="font-size:.875rem;color:var(--muted);white-space:nowrap">Invite link</span>
+        <span class="ms" style="color:var(--muted);font-size:16px">link</span>
         <div class="invite-link" id="invite-link-display">discord.gg/yourcode</div>
-        <button class="copy-btn" onclick="copyInvite()">Copy</button>
+        <button class="copy-btn" onclick="copyInvite()"><span class="ms">content_copy</span>Copy</button>
       </div>
     </div>
 
-    <!-- ANNOUNCEMENTS -->
     <div class="page" id="page-announcements">
       <div class="section-header">
-        <h2>Announcements</h2>
+        <h2><span class="ms">campaign</span>Announcements</h2>
         <span class="badge" id="ann-badge">0</span>
       </div>
       <div id="annContainer"><div class="loading"><div class="spinner"></div>Loading...</div></div>
     </div>
 
-    <!-- MEMBERS -->
     <div class="page" id="page-members">
-      <div class="section-header"><h2>Members</h2></div>
+      <div class="section-header"><h2><span class="ms">group</span>Members</h2></div>
       <div class="filter-row">
         <button class="filter-btn active" onclick="filterMembers('all',this)">All</button>
         <button class="filter-btn" onclick="filterMembers('online',this)">Online</button>
         <button class="filter-btn" onclick="filterMembers('owner',this)">Owners</button>
         <button class="filter-btn" onclick="filterMembers('mod',this)">Mods</button>
+        <button class="filter-btn" onclick="filterMembers('claimed',this)">Claimed</button>
       </div>
       <div class="members-grid" id="membersContainer"><div class="loading"><div class="spinner"></div>Loading...</div></div>
     </div>
 
-    <!-- RULES -->
     <div class="page" id="page-rules">
-      <div class="section-header"><h2>Server Rules</h2></div>
+      <div class="section-header"><h2><span class="ms">gavel</span>Rules</h2></div>
       <div id="rulesContainer"><div class="loading"><div class="spinner"></div>Loading...</div></div>
     </div>
 
   </div>
 </div>
 
+<!-- PROFILE MODAL -->
+<div class="modal-overlay hidden" id="profileModal">
+  <div class="modal">
+    <div class="modal-banner" id="profileBanner">
+      <button class="modal-close-btn" onclick="closeProfile()"><span class="ms">close</span></button>
+    </div>
+    <div class="modal-avatar" id="profileAvatar"></div>
+    <div class="modal-body">
+      <div class="modal-name" id="profileName"></div>
+      <div class="modal-role" id="profileRole"></div>
+      <div class="modal-custom-status" id="profileStatus"></div>
+      <div class="modal-bio hidden" id="profileBio"></div>
+      <div id="profileSocialsSection" class="hidden">
+        <div class="modal-section-label">Connected accounts</div>
+        <div class="modal-socials" id="profileSocials"></div>
+      </div>
+      <div id="profileClaimSection"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CLAIM MODAL -->
+<div class="modal-overlay hidden" id="claimModal">
+  <div class="modal">
+    <div style="padding:1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-weight:600;font-size:.95rem;display:flex;align-items:center;gap:.4rem"><span class="ms">verified_user</span>Claim your profile</div>
+        <div style="font-size:.775rem;color:var(--muted);margin-top:.2rem">Fill in your details. A mod will review and approve.</div>
+      </div>
+      <button onclick="closeModal('claimModal')" style="background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center"><span class="ms">close</span></button>
+    </div>
+    <div style="padding:1.5rem">
+      <div style="background:var(--surface2);border:1px solid var(--border);padding:.75rem;margin-bottom:1.25rem;font-size:.8rem;color:var(--muted);display:flex;align-items:flex-start;gap:.5rem">
+        <span class="ms" style="color:var(--accent);font-size:16px;margin-top:1px">info</span>
+        Claiming links this profile to you. A mod approves before anything goes live — your request won't show until then.
+      </div>
+      <div id="claimMemberName" style="font-weight:600;font-size:.95rem;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--border)"></div>
+      <div class="form-group"><label>Custom status</label><input class="form-input" id="cl-status" placeholder="e.g. studying for exams 📚" maxlength="80"/></div>
+      <div class="form-group"><label>Bio</label><textarea class="form-input" id="cl-bio" placeholder="Tell people a bit about yourself..." maxlength="200"></textarea></div>
+      <div style="font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem;margin-top:1.25rem">Connected accounts <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></div>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+        <div class="form-group" style="margin-bottom:.75rem"><label><span class="ms" style="font-size:14px">code</span> GitHub username</label><input class="form-input" id="cl-github" placeholder="e.g. octocat"/></div>
+        <div class="form-group" style="margin-bottom:.75rem"><label><span class="ms" style="font-size:14px">sports_esports</span> Steam username</label><input class="form-input" id="cl-steam" placeholder="e.g. gaben"/></div>
+        <div class="form-group" style="margin-bottom:.75rem"><label><span class="ms" style="font-size:14px">photo_camera</span> Instagram handle</label><input class="form-input" id="cl-instagram" placeholder="e.g. username (no @)"/></div>
+        <div class="form-group" style="margin-bottom:.75rem"><label><span class="ms" style="font-size:14px">music_note</span> Spotify username</label><input class="form-input" id="cl-spotify" placeholder="e.g. your spotify id"/></div>
+      </div>
+    </div>
+    <div style="padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.6rem;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal('claimModal')">Cancel</button>
+      <button class="btn btn-primary" id="submitClaimBtn" onclick="submitClaim()"><span class="ms">send</span>Submit request</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="ms" id="toastIcon">check_circle</span><span id="toastMsg"></span></div>
+
 <script>
-const SUPABASE_URL = 'https://ccepcamixgfvxgxwxdcv.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNjZXBjYW1peGdmdnhneHd4ZGN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTA4NjksImV4cCI6MjA4OTY4Njg2OX0.381K3TpmGoSdhgUP-ntAloGTxiPov5cqONiRtQXwlXs';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL='https://ccepcamixgfvxgxwxdcv.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNjZXBjYW1peGdmdnhneHd4ZGN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTA4NjksImV4cCI6MjA4OTY4Njg2OX0.381K3TpmGoSdhgUP-ntAloGTxiPov5cqONiRtQXwlXs';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let allMembers = [];
-let inviteLink = 'discord.gg/yourcode';
-
-async function loadSettings() {
-  const { data } = await sb.from('settings').select('*');
-  if (!data) return;
-  const s = {};
-  data.forEach(r => s[r.key] = r.value);
-  if (s.server_name) {
-    document.getElementById('nav-server-name').textContent = s.server_name;
-    document.getElementById('home-server-name').textContent = s.server_name;
-    document.title = s.server_name;
-  }
-  if (s.description) document.getElementById('home-desc').textContent = s.description;
-  if (s.invite_link) {
-    inviteLink = s.invite_link;
-    document.getElementById('invite-link-display').textContent = s.invite_link;
-  }
-  return s;
+const FONTS={'jetbrains':"'JetBrains Mono',monospace",'noto':"'Noto Sans',sans-serif",'ubuntu':"'Ubuntu',sans-serif",'datatype':"'JetBrains Mono',monospace"};
+const THEMES={
+  discord:{bg:'#0f1117',surface:'#16191f',surface2:'#1d2129',border:'#2a2d35',accent:'#5865F2',text:'#e3e5e8',muted:'#8e9297'},
+  midnight:{bg:'#0a0a0f',surface:'#111118',surface2:'#18181f',border:'#252530',accent:'#7c5cfc',text:'#e8e8f0',muted:'#888899'},
+  forest:{bg:'#0d1210',surface:'#141c18',surface2:'#1c2820',border:'#253028',accent:'#3ba55d',text:'#d8ede0',muted:'#7a9e82'},
+  crimson:{bg:'#130c0c',surface:'#1c1010',surface2:'#261616',border:'#3a2020',accent:'#ed4245',text:'#f0dede',muted:'#a07878'},
+  ocean:{bg:'#091218',surface:'#0e1c26',surface2:'#142433',border:'#1e3040',accent:'#0099cc',text:'#d0eaf5',muted:'#6899aa'},
+};
+function applyTheme(s){
+  const r=document.documentElement,t=THEMES[s.theme||'discord']||THEMES.discord;
+  Object.entries(t).forEach(([k,v])=>r.style.setProperty('--'+k,v));
+  r.style.setProperty('--font',FONTS[s.font||'jetbrains']||FONTS.jetbrains);
 }
 
-async function checkPassword(pw) {
-  const { data } = await sb.from('settings').select('value').eq('key', 'password').single();
-  return data && data.value === pw;
-}
+let allMembers=[],inviteLink='discord.gg/yourcode',claimingMemberId=null;
 
-async function loadMembers() {
-  const { data } = await sb.from('members').select('*').order('id');
-  if (!data) return;
-  allMembers = data;
-  document.getElementById('stat-members').textContent = data.length;
-  document.getElementById('stat-online').textContent = data.filter(m => m.status === 'online').length;
+async function loadSettings(){
+  const{data}=await sb.from('settings').select('*');
+  if(!data)return{};
+  const s={};data.forEach(r=>s[r.key]=r.value);
+  if(s.server_name){document.getElementById('nav-server-name').textContent=s.server_name;document.getElementById('home-server-name').textContent=s.server_name;document.title=s.server_name;}
+  if(s.description)document.getElementById('home-desc').textContent=s.description;
+  if(s.invite_link){inviteLink=s.invite_link;document.getElementById('invite-link-display').textContent=s.invite_link;}
+  applyTheme(s);return s;
+}
+async function checkPassword(pw){const{data}=await sb.from('settings').select('value').eq('key','password').single();return data&&data.value===pw;}
+async function loadMembers(){
+  const{data}=await sb.from('members').select('*').order('id');
+  if(!data)return;
+  allMembers=data;
+  document.getElementById('stat-members').textContent=data.length;
+  document.getElementById('stat-online').textContent=data.filter(m=>m.status==='online').length;
   renderMembers('all');
 }
-
-async function loadAnnouncements() {
-  const { data } = await sb.from('announcements').select('*').order('id', { ascending: false });
-  const container = document.getElementById('annContainer');
-  if (!data || data.length === 0) { container.innerHTML = '<div class="loading">No announcements yet.</div>'; return; }
-  document.getElementById('ann-badge').textContent = data.length;
-  document.getElementById('stat-ann').textContent = data.length;
-  container.innerHTML = data.map(a => {
-    const isPinned = a.tag && a.tag.includes('PINNED');
-    return `<div class="announce-card ${isPinned ? 'pinned' : ''}">
-      <div class="announce-header"><span class="tag">${a.tag || '📢 NEWS'}</span><span class="announce-date">${a.date || ''}</span></div>
+async function loadAnnouncements(){
+  const{data}=await sb.from('announcements').select('*').order('id',{ascending:false});
+  const c=document.getElementById('annContainer');
+  if(!data||!data.length){c.innerHTML='<div class="loading">No announcements yet.</div>';return;}
+  document.getElementById('ann-badge').textContent=data.length;
+  document.getElementById('stat-ann').textContent=data.length;
+  const tagIcons={'📢 NEWS':'campaign','📌 PINNED':'push_pin','🎉 EVENT':'celebration','⚠️ URGENT':'warning'};
+  c.innerHTML=data.map(a=>{
+    const isPinned=a.tag&&a.tag.includes('PINNED');
+    const icon=tagIcons[a.tag]||'campaign';
+    const label=(a.tag||'NEWS').replace(/[^\w\s]/g,'').trim();
+    return`<div class="announce-card${isPinned?' pinned':''}">
+      <div class="announce-header"><span class="tag"><span class="ms">${icon}</span>${label}</span><span class="announce-date">${a.date||''}</span></div>
       <div class="announce-title">${a.title}</div>
-      <div class="announce-body">${a.body || ''}</div>
+      <div class="announce-body">${a.body||''}</div>
+    </div>`;
+  }).join('');
+}
+async function loadRules(){
+  const{data}=await sb.from('rules').select('*').order('id');
+  const c=document.getElementById('rulesContainer');
+  if(!data||!data.length){c.innerHTML='<div class="loading">No rules yet.</div>';return;}
+  c.innerHTML=data.map((r,i)=>`
+    <div class="rule-card">
+      <div class="rule-num">${i+1}</div>
+      <div><div class="rule-title">${r.title}</div><div class="rule-body">${r.body||''}</div></div>
+    </div>`).join('');
+}
+
+function initials(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase();}
+
+function socialLinks(m){
+  const links=[];
+  if(m.github)links.push(`<a class="social-link" href="https://github.com/${m.github}" target="_blank"><span class="ms">code</span>${m.github}</a>`);
+  if(m.steam)links.push(`<a class="social-link" href="https://steamcommunity.com/id/${m.steam}" target="_blank"><span class="ms">sports_esports</span>${m.steam}</a>`);
+  if(m.instagram)links.push(`<a class="social-link" href="https://instagram.com/${m.instagram}" target="_blank"><span class="ms">photo_camera</span>${m.instagram}</a>`);
+  if(m.spotify)links.push(`<a class="social-link" href="https://open.spotify.com/user/${m.spotify}" target="_blank"><span class="ms">music_note</span>${m.spotify}</a>`);
+  return links;
+}
+
+function renderMembers(filter){
+  const list=filter==='all'?allMembers:
+    filter==='claimed'?allMembers.filter(m=>m.claimed):
+    filter==='online'?allMembers.filter(m=>m.status==='online'):
+    allMembers.filter(m=>m.role===filter);
+  const c=document.getElementById('membersContainer');
+  if(!list.length){c.innerHTML='<div class="loading">No members found.</div>';return;}
+  c.innerHTML=list.map(m=>{
+    const links=socialLinks(m);
+    const statusText=m.custom_status?`<span class="ms" style="font-size:13px">circle</span>${m.custom_status}`:'';
+    return`<div class="member-card" onclick="openProfile(${m.id})">
+      ${m.claimed?'<div class="claim-badge"><span class="ms" style="font-size:10px">verified</span> claimed</div>':'<div class="unclaimed-badge">unclaimed</div>'}
+      <div class="member-card-top">
+        <div class="avatar" style="background:${m.color||'#5865F2'}22;color:${m.color||'#5865F2'}">${initials(m.name)}</div>
+        <div class="member-info" style="flex:1;min-width:0">
+          <div class="name">${m.name}</div>
+          <div class="role-label ${m.role}">${m.role.charAt(0).toUpperCase()+m.role.slice(1)}</div>
+        </div>
+        <div class="status-dot ${m.status||'offline'}"></div>
+      </div>
+      ${statusText?`<div class="member-status-text">${statusText}</div>`:''}
+      ${links.length?`<div class="member-links">${links.slice(0,2).join('')}${links.length>2?`<span class="social-link">+${links.length-2}</span>`:''}</div>`:''}
     </div>`;
   }).join('');
 }
 
-async function loadRules() {
-  const { data } = await sb.from('rules').select('*').order('id');
-  const container = document.getElementById('rulesContainer');
-  if (!data || data.length === 0) { container.innerHTML = '<div class="loading">No rules yet.</div>'; return; }
-  container.innerHTML = data.map((r, i) => `
-    <div class="rule-card">
-      <div class="rule-num">${i + 1}</div>
-      <div><div class="rule-title">${r.title}</div><div class="rule-body">${r.body || ''}</div></div>
-    </div>`).join('');
+function filterMembers(f,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');renderMembers(f);
 }
 
-function initials(n) { return n.split(' ').map(w => w[0]).join('').toUpperCase(); }
-
-function renderMembers(filter) {
-  const list = filter === 'all' ? allMembers : allMembers.filter(m => {
-    if (filter === 'online') return m.status === 'online';
-    return m.role === filter;
-  });
-  const container = document.getElementById('membersContainer');
-  if (list.length === 0) { container.innerHTML = '<div class="loading">No members found.</div>'; return; }
-  container.innerHTML = list.map(m => `
-    <div class="member-card">
-      <div class="avatar" style="background:${m.color || '#5865F2'}22;color:${m.color || '#5865F2'}">${initials(m.name)}</div>
-      <div class="member-info">
-        <div class="name">${m.name}</div>
-        <div class="role-label ${m.role}">${m.role.charAt(0).toUpperCase() + m.role.slice(1)}</div>
-      </div>
-      <div class="status-dot ${m.status || 'offline'}"></div>
-    </div>`).join('');
-}
-
-function filterMembers(f, btn) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderMembers(f);
-}
-
-function showPage(id, el) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  el.classList.add('active');
-}
-
-function copyInvite() {
-  navigator.clipboard && navigator.clipboard.writeText(inviteLink);
-  const btn = document.querySelector('.copy-btn');
-  btn.textContent = 'Copied!';
-  setTimeout(() => btn.textContent = 'Copy', 2000);
-}
-
-function logout() {
-  sessionStorage.removeItem('server_auth');
-  document.getElementById('mainApp').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('pwInput').value = '';
-}
-
-async function login() {
-  const btn = document.getElementById('loginBtn');
-  const err = document.getElementById('loginErr');
-  const pw = document.getElementById('pwInput').value;
-  if (!pw) return;
-  btn.disabled = true;
-  btn.textContent = 'Checking...';
-  err.classList.add('hidden');
-  const ok = await checkPassword(pw);
-  if (ok) {
-    sessionStorage.setItem('server_auth', '1');
-    document.getElementById('loginScreen').style.display = 'none';
-    const app = document.getElementById('mainApp');
-    app.classList.remove('hidden');
-    app.style.display = 'flex';
-    await loadSettings();
-    await Promise.all([loadMembers(), loadAnnouncements(), loadRules()]);
-  } else {
-    err.classList.remove('hidden');
-    btn.disabled = false;
-    btn.textContent = 'Enter Server';
+// ── PROFILE MODAL ─────────────────────────────────────
+function openProfile(id){
+  const m=allMembers.find(x=>x.id===id);if(!m)return;
+  const color=m.color||'#5865F2';
+  document.getElementById('profileBanner').style.background=color;
+  const av=document.getElementById('profileAvatar');
+  av.textContent=initials(m.name);av.style.background=color+'33';av.style.color=color;
+  document.getElementById('profileName').innerHTML=`${m.name}${m.claimed?'<span class="ms" style="font-size:16px;color:var(--accent)">verified</span>':''}`;
+  const roleColors={owner:'#ffd700',admin:'var(--red)',mod:'var(--accent2)',member:'var(--muted)'};
+  document.getElementById('profileRole').innerHTML=`<span style="color:${roleColors[m.role]||'var(--muted)'}">${m.role.charAt(0).toUpperCase()+m.role.slice(1)}</span> <span style="color:var(--muted);margin:0 .3rem">·</span> <span style="color:var(--muted)">${m.status||'offline'}</span>`;
+  const statusEl=document.getElementById('profileStatus');
+  if(m.custom_status){statusEl.innerHTML=`<span class="ms" style="font-size:14px;color:var(--accent)">circle</span>${m.custom_status}`;statusEl.classList.remove('hidden');}
+  else{statusEl.classList.add('hidden');}
+  const bioEl=document.getElementById('profileBio');
+  if(m.bio){bioEl.textContent=m.bio;bioEl.classList.remove('hidden');}else{bioEl.classList.add('hidden');}
+  const links=socialLinks(m);
+  const socialsSection=document.getElementById('profileSocialsSection');
+  if(links.length){
+    document.getElementById('profileSocials').innerHTML=links.map(l=>l.replace('social-link','modal-social-btn')).join('');
+    socialsSection.classList.remove('hidden');
+  }else{socialsSection.classList.add('hidden');}
+  const claimSection=document.getElementById('profileClaimSection');
+  if(!m.claimed){
+    claimSection.innerHTML=`<div style="padding-top:1rem;border-top:1px solid var(--border)">
+      <div style="font-size:.825rem;color:var(--muted);margin-bottom:.75rem">This profile hasn't been claimed yet. Is this you?</div>
+      <button class="btn btn-primary" onclick="startClaim(${m.id},'${m.name}')"><span class="ms">verified_user</span>Claim this profile</button>
+    </div>`;
+  }else{
+    claimSection.innerHTML=`<div style="padding-top:1rem;border-top:1px solid var(--border);font-size:.775rem;color:var(--muted);display:flex;align-items:center;gap:.4rem"><span class="ms" style="font-size:15px;color:var(--accent)">verified</span>Profile claimed and verified</div>`;
   }
+  document.getElementById('profileModal').classList.remove('hidden');
+}
+function closeProfile(){document.getElementById('profileModal').classList.add('hidden');}
+
+// ── CLAIM FLOW ────────────────────────────────────────
+function startClaim(id,name){
+  claimingMemberId=id;
+  closeProfile();
+  document.getElementById('claimMemberName').innerHTML=`<span class="ms" style="font-size:16px;color:var(--muted)">person</span> Claiming: <strong>${name}</strong>`;
+  document.getElementById('cl-status').value='';
+  document.getElementById('cl-bio').value='';
+  document.getElementById('cl-github').value='';
+  document.getElementById('cl-steam').value='';
+  document.getElementById('cl-instagram').value='';
+  document.getElementById('cl-spotify').value='';
+  document.getElementById('claimModal').classList.remove('hidden');
 }
 
-document.getElementById('loginBtn').onclick = login;
-document.getElementById('pwInput').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+async function submitClaim(){
+  if(!claimingMemberId)return;
+  const btn=document.getElementById('submitClaimBtn');
+  btn.disabled=true;btn.innerHTML='<span class="ms">sync</span>Submitting...';
+  const{error}=await sb.from('claim_requests').insert({
+    member_id:claimingMemberId,
+    bio:document.getElementById('cl-bio').value||null,
+    custom_status:document.getElementById('cl-status').value||null,
+    github:document.getElementById('cl-github').value||null,
+    steam:document.getElementById('cl-steam').value||null,
+    instagram:document.getElementById('cl-instagram').value||null,
+    spotify:document.getElementById('cl-spotify').value||null,
+    status:'pending',
+  });
+  btn.disabled=false;btn.innerHTML='<span class="ms">send</span>Submit request';
+  if(error){toast('Something went wrong. Try again.','error');return;}
+  closeModal('claimModal');
+  toast('Request submitted! A mod will review it soon.');
+}
 
-// Auto-login if already authenticated this session
-if (sessionStorage.getItem('server_auth') === '1') {
-  document.getElementById('loginScreen').style.display = 'none';
-  const app = document.getElementById('mainApp');
-  app.classList.remove('hidden');
-  app.style.display = 'flex';
-  loadSettings().then(() => Promise.all([loadMembers(), loadAnnouncements(), loadRules()]));
+function closeModal(id){document.getElementById(id).classList.add('hidden');}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.add('hidden');}));
+
+function showPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');el.classList.add('active');
+}
+function copyInvite(){
+  navigator.clipboard&&navigator.clipboard.writeText(inviteLink);
+  const btn=document.querySelector('.copy-btn');
+  btn.innerHTML='<span class="ms">check</span>Copied!';
+  setTimeout(()=>btn.innerHTML='<span class="ms">content_copy</span>Copy',2000);
+}
+function logout(){sessionStorage.removeItem('server_auth');document.getElementById('mainApp').style.display='none';document.getElementById('loginScreen').style.display='flex';document.getElementById('pwInput').value='';}
+
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast'),icon=document.getElementById('toastIcon');
+  document.getElementById('toastMsg').textContent=msg;
+  icon.textContent=type==='error'?'error':'check_circle';
+  icon.style.color=type==='error'?'var(--red)':'var(--green)';
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+async function login(){
+  const btn=document.getElementById('loginBtn'),err=document.getElementById('loginErr'),pw=document.getElementById('pwInput').value;
+  if(!pw)return;
+  btn.disabled=true;btn.innerHTML='<span class="ms">sync</span>Checking...';err.classList.add('hidden');
+  const ok=await checkPassword(pw);
+  if(ok){
+    sessionStorage.setItem('server_auth','1');
+    document.getElementById('loginScreen').style.display='none';
+    const app=document.getElementById('mainApp');app.classList.remove('hidden');app.style.display='flex';
+    await loadSettings();
+    await Promise.all([loadMembers(),loadAnnouncements(),loadRules()]);
+  }else{err.classList.remove('hidden');btn.disabled=false;btn.innerHTML='<span class="ms">login</span>Enter Server';}
+}
+document.getElementById('loginBtn').onclick=login;
+document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+if(sessionStorage.getItem('server_auth')==='1'){
+  document.getElementById('loginScreen').style.display='none';
+  const app=document.getElementById('mainApp');app.classList.remove('hidden');app.style.display='flex';
+  loadSettings().then(()=>Promise.all([loadMembers(),loadAnnouncements(),loadRules()]));
 }
 </script>
 </body>
