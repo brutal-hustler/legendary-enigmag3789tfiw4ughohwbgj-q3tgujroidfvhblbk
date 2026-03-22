@@ -315,8 +315,9 @@ textarea.form-input{resize:vertical;min-height:70px;line-height:1.5}
     <div style="padding:1.5rem">
       <div style="background:var(--surface2);border:1px solid var(--border);padding:.75rem;margin-bottom:1.25rem;font-size:.8rem;color:var(--muted);display:flex;align-items:flex-start;gap:.5rem">
         <span class="ms" style="font-size:16px;color:var(--accent);margin-top:1px">info</span>
-        Bounties go live immediately. A mod can close or remove them if needed.
+        Bounties go live immediately. You can mark your own as done or delete it later.
       </div>
+      <div class="form-group"><label>Your name <span style="color:var(--muted);font-weight:400">(shown on the bounty)</span></label><input class="form-input" id="sb-poster" placeholder="Your Discord nickname" maxlength="50"/></div>
       <div class="form-group"><label>Title</label><input class="form-input" id="sb-title" placeholder="e.g. Design a server banner" maxlength="100"/></div>
       <div class="form-group"><label>Description</label><textarea class="form-input" id="sb-desc" placeholder="What needs to be done? Be specific..." maxlength="400"></textarea></div>
       <div class="form-group"><label>Reward <span style="color:var(--muted);font-weight:400">(optional)</span></label><input class="form-input" id="sb-reward" placeholder="e.g. Custom role, shoutout, bragging rights..." maxlength="100"/></div>
@@ -337,24 +338,42 @@ textarea.form-input{resize:vertical;min-height:70px;line-height:1.5}
 
 <!-- PREFERENCES MODAL -->
 <div class="modal-overlay hidden" id="prefsModal">
-  <div class="modal" style="max-width:440px">
+  <div class="modal" style="max-width:480px">
     <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
       <div style="font-weight:600;font-size:.95rem;display:flex;align-items:center;gap:.4rem"><span class="ms">tune</span>Personal preferences</div>
       <button onclick="closeModal('prefsModal')" style="background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center"><span class="ms">close</span></button>
     </div>
-    <div style="padding:1.25rem 1.5rem">
+    <div style="padding:1.25rem 1.5rem;max-height:70vh;overflow-y:auto">
+
       <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem">Colour theme</div>
-      <div id="prefsThemeGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:.5rem;margin-bottom:1.25rem"></div>
+      <div id="prefsThemeGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:.5rem;margin-bottom:1.25rem"></div>
+
       <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem">Font</div>
-      <div id="prefsFontGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.5rem;margin-bottom:1.5rem"></div>
-      <div style="background:var(--surface2);border:1px solid var(--border);padding:.6rem .875rem;font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:.4rem;margin-bottom:1.25rem">
+      <div id="prefsFontGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.5rem;margin-bottom:1.25rem"></div>
+
+      <!-- CUSTOM THEME BUILDER -->
+      <div style="border-top:1px solid var(--border);padding-top:1.25rem;margin-top:.25rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+          <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Build your own theme</div>
+          <button onclick="resetPrefBuilder()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--font);display:flex;align-items:center;gap:.2rem"><span class="ms" style="font-size:13px">refresh</span>Reset</button>
+        </div>
+        <div class="form-group" style="margin-bottom:.875rem"><label>Theme name</label><input class="form-input" id="pb-name" placeholder="e.g. My pink theme" maxlength="40"/></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.6rem;margin-bottom:.875rem" id="pbSwatchGrid"></div>
+        <div style="background:var(--surface2);border:1px solid var(--border);padding:.875rem;margin-bottom:.875rem" id="pbPreview"></div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <button class="btn btn-ghost" onclick="previewPrefTheme()" style="font-size:.775rem"><span class="ms">visibility</span>Preview</button>
+          <button class="btn btn-primary" onclick="savePrefTheme()" style="font-size:.775rem"><span class="ms">add</span>Save theme</button>
+        </div>
+      </div>
+
+      <div style="background:var(--surface2);border:1px solid var(--border);padding:.6rem .875rem;font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:.4rem;margin-top:1.25rem">
         <span class="ms" style="font-size:14px">info</span>
-        Your preference is saved on this device only. Others see the site default.
+        Your preference is saved on this device only.
       </div>
-      <div style="display:flex;gap:.6rem;justify-content:flex-end">
-        <button class="btn btn-ghost" onclick="resetPreferences()"><span class="ms">refresh</span>Reset to default</button>
-        <button class="btn btn-primary" onclick="savePreferences()"><span class="ms">save</span>Save</button>
-      </div>
+    </div>
+    <div style="padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.6rem;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="resetPreferences()"><span class="ms">refresh</span>Reset to default</button>
+      <button class="btn btn-primary" onclick="savePreferences()"><span class="ms">save</span>Save</button>
     </div>
   </div>
 </div>
@@ -441,6 +460,7 @@ function buildPrefsUI(){
       <div style="font-size:.68rem;color:var(--muted)">${samples[id]}</div>
     </div>`;
   }).join('');
+  buildPbSwatches();
 }
 
 function prefsSelectTheme(id){
@@ -475,6 +495,107 @@ function resetPreferences(){
   applyTheme({theme:siteTheme,font:siteFont});
   closeModal('prefsModal');
   toast('Reset to site default');
+}
+
+// ── PREF THEME BUILDER ────────────────────────────────
+const PB_FIELDS=[
+  {key:'bg',      label:'Background'},
+  {key:'surface', label:'Surface'},
+  {key:'surface2',label:'Surface 2'},
+  {key:'border',  label:'Border'},
+  {key:'accent',  label:'Accent'},
+  {key:'text',    label:'Text'},
+  {key:'muted',   label:'Muted'},
+];
+const PB_DEFAULTS={bg:'#0f1117',surface:'#16191f',surface2:'#1d2129',border:'#2a2d35',accent:'#5865F2',text:'#e3e5e8',muted:'#8e9297'};
+let pbColors={...PB_DEFAULTS};
+
+function buildPbSwatches(){
+  document.getElementById('pbSwatchGrid').innerHTML=PB_FIELDS.map(f=>`
+    <div>
+      <div style="font-size:.68rem;color:var(--muted);margin-bottom:.3rem">${f.label}</div>
+      <div style="display:flex;gap:.35rem;align-items:center">
+        <input type="color" value="${pbColors[f.key]}"
+          oninput="pbSetColor('${f.key}',this.value)"
+          style="width:32px;height:32px;padding:1px;cursor:pointer;background:none;border:1px solid var(--border);flex-shrink:0"/>
+        <input type="text" value="${pbColors[f.key]}" maxlength="7"
+          oninput="pbSetHex('${f.key}',this.value)"
+          id="pb-hex-${f.key}"
+          style="flex:1;background:var(--surface2);border:1px solid var(--border);padding:.3rem .4rem;color:var(--text);font-size:.7rem;font-family:var(--font);outline:none;min-width:0"/>
+      </div>
+    </div>`).join('');
+  updatePbPreview();
+}
+
+function pbSetColor(key,val){
+  pbColors[key]=val;
+  const hex=document.getElementById('pb-hex-'+key);
+  if(hex)hex.value=val;
+  updatePbPreview();
+}
+function pbSetHex(key,val){
+  if(/^#[0-9a-fA-F]{6}$/.test(val)){
+    pbColors[key]=val;
+    const cp=document.querySelector(`input[type=color][oninput*="'${key}'"]`);
+    if(cp)cp.value=val;
+    updatePbPreview();
+  }
+}
+
+function updatePbPreview(){
+  const v=pbColors;
+  const name=document.getElementById('pb-name')?.value||'Preview';
+  document.getElementById('pbPreview').innerHTML=`
+    <div style="background:${v.bg};padding:.75rem;border:1px solid ${v.border}">
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem">
+        <div style="width:26px;height:26px;background:${v.accent};display:flex;align-items:center;justify-content:center"><span class="ms" style="color:#fff;font-size:13px">forum</span></div>
+        <span style="font-weight:600;font-size:.8rem;color:${v.text}">${name}</span>
+      </div>
+      <div style="background:${v.surface};border:1px solid ${v.border};padding:.45rem .6rem;margin-bottom:.45rem;font-size:.72rem;color:${v.muted}">Surface card</div>
+      <div style="background:${v.surface2};border:1px solid ${v.border};padding:.45rem .6rem;margin-bottom:.6rem;font-size:.72rem;color:${v.muted}">Input / surface 2</div>
+      <div style="display:flex;gap:.35rem">
+        <div style="background:${v.accent};color:#fff;padding:.25rem .55rem;font-size:.68rem">Accent</div>
+        <div style="background:${v.surface2};border:1px solid ${v.border};color:${v.text};padding:.25rem .55rem;font-size:.68rem">Ghost</div>
+      </div>
+    </div>`;
+}
+
+function previewPrefTheme(){
+  const r=document.documentElement,v=pbColors;
+  r.style.setProperty('--bg',v.bg);r.style.setProperty('--surface',v.surface);
+  r.style.setProperty('--surface2',v.surface2);r.style.setProperty('--border',v.border);
+  r.style.setProperty('--accent',v.accent);r.style.setProperty('--text',v.text);
+  r.style.setProperty('--muted',v.muted);
+  toast('Previewing — save it to keep it!');
+}
+
+async function savePrefTheme(){
+  const name=(document.getElementById('pb-name').value||'').trim();
+  if(!name){toast('Give your theme a name first','error');return;}
+  const btn=event.target.closest('button');
+  btn.disabled=true;btn.innerHTML='<span class="ms">sync</span>Saving...';
+  const{data,error}=await sb.from('custom_themes').insert({
+    name,
+    bg:pbColors.bg, surface:pbColors.surface, surface2:pbColors.surface2,
+    border:pbColors.border, accent:pbColors.accent,
+    text_color:pbColors.text, muted:pbColors.muted,
+  }).select().single();
+  btn.disabled=false;btn.innerHTML='<span class="ms">add</span>Save theme';
+  if(error){toast('Error saving theme','error');return;}
+  // Add to cache and select it
+  customThemesCache.push(data);
+  const newId='custom_'+data.id;
+  prefsSelectedTheme=newId;
+  buildPrefsUI();
+  // Auto-select the new theme
+  prefsSelectTheme(newId);
+  toast(`Theme "${name}" saved and selected!`);
+}
+
+function resetPrefBuilder(){
+  document.getElementById('pb-name').value='';
+  pbColors={...PB_DEFAULTS};
+  buildPbSwatches();
 }
 
 let siteTheme='discord',siteFont='jetbrains';
@@ -532,23 +653,56 @@ async function loadRules(){
     </div>`).join('');
 }
 
+// ── BOUNTIES ──────────────────────────────────────────
+const diffColors={easy:'var(--green)',medium:'var(--yellow)',hard:'var(--red)'};
+const bountyCache={};
+
 async function loadBounties(){
-  const{data}=await sb.from('bounties').select('*').eq('status','open').order('created_at',{ascending:false});
+  const{data}=await sb.from('bounties').select('*').in('status',['open','claimed']).order('created_at',{ascending:false});
   const c=document.getElementById('bountiesContainer');
-  if(!data||!data.length){c.innerHTML='<div class="loading">No open bounties right now. Check back later!</div>';return;}
-  const diffColors={easy:'var(--green)',medium:'var(--yellow)',hard:'var(--red)'};
-  c.innerHTML=data.map(b=>`
-    <div style="background:var(--surface);border:1px solid var(--border);padding:1.25rem;margin-bottom:.875rem;border-left:3px solid ${diffColors[b.difficulty]||'var(--accent)'}">
-      <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.5rem">
-        <span style="font-weight:600;font-size:.9rem">${b.title}</span>
-        <span style="font-size:.68rem;padding:.15rem .45rem;background:${diffColors[b.difficulty]||'var(--accent)'}18;color:${diffColors[b.difficulty]||'var(--accent)'};font-weight:600">${b.difficulty}</span>
-        ${b.reward?`<span style="font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:.25rem;margin-left:auto"><span class="ms" style="font-size:14px">redeem</span>${b.reward}</span>`:''}
+  if(!data||!data.length){
+    c.innerHTML='<div class="loading">No open bounties right now. Be the first to post one!</div>';
+    return;
+  }
+  // Cache for action buttons
+  data.forEach(b=>bountyCache[b.id]=b);
+  const myName=getMyName();
+  c.innerHTML=data.map(b=>{
+    const isOwner=myName&&b.created_by&&b.created_by.toLowerCase()===myName.toLowerCase();
+    const isClaimed=b.status==='claimed';
+    const isAcceptor=myName&&b.accepted_by&&b.accepted_by.toLowerCase()===myName.toLowerCase();
+    return`<div style="background:var(--surface);border:1px solid var(--border);padding:1.25rem;margin-bottom:.875rem;border-left:3px solid ${diffColors[b.difficulty]||'var(--accent)'}">
+      <div style="display:flex;align-items:flex-start;gap:.75rem">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.4rem">
+            <span style="font-weight:600;font-size:.9rem">${b.title}</span>
+            <span style="font-size:.68rem;padding:.15rem .45rem;background:${diffColors[b.difficulty]||'var(--accent)'}18;color:${diffColors[b.difficulty]||'var(--accent)'};font-weight:600">${b.difficulty}</span>
+            ${isClaimed?`<span style="font-size:.68rem;padding:.15rem .45rem;background:var(--yellow)18;color:var(--yellow);font-weight:600">claimed</span>`:''}
+            ${b.reward?`<span style="font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:.25rem;margin-left:auto"><span class="ms" style="font-size:14px">redeem</span>${b.reward}</span>`:''}
+          </div>
+          ${b.description?`<div style="font-size:.838rem;color:var(--muted);line-height:1.6;margin-bottom:.5rem">${b.description}</div>`:''}
+          <div style="display:flex;align-items:center;gap:1rem;font-size:.72rem;color:var(--muted);flex-wrap:wrap">
+            ${b.created_by?`<span style="display:flex;align-items:center;gap:.25rem"><span class="ms" style="font-size:13px">person</span>Posted by <strong style="color:var(--text)">${b.created_by}</strong></span>`:''}
+            ${b.accepted_by?`<span style="display:flex;align-items:center;gap:.25rem"><span class="ms" style="font-size:13px;color:var(--yellow)">bolt</span>Accepted by <strong style="color:var(--text)">${b.accepted_by}</strong></span>`:''}
+          </div>
+          <div style="display:flex;gap:.4rem;margin-top:.75rem;flex-wrap:wrap">
+            ${!isClaimed?`<button class="btn btn-primary" style="font-size:.75rem;padding:.3rem .65rem" onclick="acceptBounty(${b.id})"><span class="ms">bolt</span>Accept</button>`:''}
+            ${isAcceptor?`<button class="btn btn-ghost" style="font-size:.75rem;padding:.3rem .65rem" onclick="unacceptBounty(${b.id})"><span class="ms">undo</span>Un-accept</button>`:''}
+            ${isOwner?`<button class="btn btn-ghost" style="font-size:.75rem;padding:.3rem .65rem" onclick="doneBounty(${b.id})"><span class="ms">check_circle</span>Mark done</button>`:''}
+            ${isOwner?`<button class="btn btn-danger" style="font-size:.75rem;padding:.3rem .65rem" onclick="deleteBountyPublic(${b.id})"><span class="ms">delete</span>Delete</button>`:''}
+          </div>
+        </div>
       </div>
-      ${b.description?`<div style="font-size:.838rem;color:var(--muted);line-height:1.6">${b.description}</div>`:''}
-    </div>`).join('');
+    </div>`;
+  }).join('');
+}
+
+function getMyName(){
+  try{return localStorage.getItem('bounty_name')||'';}catch(e){return'';}
 }
 
 function openSubmitBounty(){
+  document.getElementById('sb-poster').value=getMyName();
   document.getElementById('sb-title').value='';
   document.getElementById('sb-desc').value='';
   document.getElementById('sb-reward').value='';
@@ -558,21 +712,55 @@ function openSubmitBounty(){
 
 async function submitBounty(){
   const title=document.getElementById('sb-title').value.trim();
-  if(!title){toast('Give your bounty a title first','error');return;}
+  const poster=document.getElementById('sb-poster').value.trim();
+  if(!poster){toast('Enter your name so others know who posted this','error');return;}
+  if(!title){toast('Give your bounty a title','error');return;}
   const btn=document.getElementById('submitBountyBtn');
   btn.disabled=true;btn.innerHTML='<span class="ms">sync</span>Posting...';
+  // Remember name for next time
+  try{localStorage.setItem('bounty_name',poster);}catch(e){}
   const{error}=await sb.from('bounties').insert({
     title,
     description:document.getElementById('sb-desc').value||null,
     reward:document.getElementById('sb-reward').value||null,
     difficulty:document.getElementById('sb-difficulty').value,
     status:'open',
+    created_by:poster,
   });
   btn.disabled=false;btn.innerHTML='<span class="ms">send</span>Post bounty';
   if(error){toast('Something went wrong. Try again.','error');return;}
   closeModal('submitBountyModal');
   await loadBounties();
   toast('Bounty posted!');
+}
+
+async function acceptBounty(id){
+  const name=getMyName()||prompt('Enter your name to accept this bounty:');
+  if(!name)return;
+  try{localStorage.setItem('bounty_name',name);}catch(e){}
+  await sb.from('bounties').update({status:'claimed',accepted_by:name}).eq('id',id);
+  await loadBounties();
+  toast(`You accepted this bounty!`);
+}
+
+async function unacceptBounty(id){
+  await sb.from('bounties').update({status:'open',accepted_by:null}).eq('id',id);
+  await loadBounties();
+  toast('Bounty is open again');
+}
+
+async function doneBounty(id){
+  if(!confirm('Mark this bounty as completed?'))return;
+  await sb.from('bounties').update({status:'completed'}).eq('id',id);
+  await loadBounties();
+  toast('Bounty marked as done!');
+}
+
+async function deleteBountyPublic(id){
+  if(!confirm('Delete your bounty?'))return;
+  await sb.from('bounties').delete().eq('id',id);
+  await loadBounties();
+  toast('Bounty deleted');
 }
 
 function initials(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase();}
